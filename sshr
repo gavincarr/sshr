@@ -33,12 +33,14 @@ puts "cmd:   #{cmd}"
 
 trap("INT") { puts; exit }
 
-Net::SSH::Multi.start do |session|
+Net::SSH::Multi.start(:on_error => :ignore) do |session|
   args.each do |host|
     session.use("root@#{host}")
   end
 
-  session.exec(cmd)
+  session.exec(cmd) do |ch, stream, data|
+    puts "#{ch[:host]}: [#{stream}] #{data}"
+  end
 
   session.loop
 end
