@@ -1,0 +1,45 @@
+#!/usr/bin/env ruby
+#
+# Yet another parallel ssh wrapper
+#
+
+require 'rubygems'
+require 'optparse'
+require 'net/ssh/multi'
+
+# Parse options
+opts = OptionParser.new
+opts.banner = "Usage: sshr [options] <host1> [<host2> ...] <cmd>"
+opts.on('-?', '-h', '--help') do
+  puts opts
+  exit
+end
+
+begin
+  args = opts.parse(ARGV)
+rescue => e
+  puts "Error: " << e
+  puts opts
+  exit
+end
+if args.length < 2:
+  puts opts
+  exit
+end
+
+cmd = args.pop
+puts "hosts: #{args.join(' ')}"
+puts "cmd:   #{cmd}"
+
+trap("INT") { puts; exit }
+
+Net::SSH::Multi.start do |session|
+  args.each do |host|
+    session.use("root@#{host}")
+  end
+
+  session.exec(cmd)
+
+  session.loop
+end
+
