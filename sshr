@@ -3,9 +3,10 @@
 # Yet another parallel ssh wrapper
 #
 
-require 'rubygems'
 require 'optparse'
-require 'net/ssh/multi'
+
+$LOAD_PATH.unshift File.join(File.dirname(__FILE__), 'lib')
+require 'net/sshr'
 
 # Parse options
 opts = OptionParser.new
@@ -28,20 +29,17 @@ if args.length < 2:
 end
 
 cmd = args.pop
-puts "hosts: #{args.join(' ')}"
-puts "cmd:   #{cmd}"
+#puts "hosts: #{args.join(' ')}"
+#puts "cmd:   #{cmd}"
 
 trap("INT") { puts; exit }
 
-Net::SSH::Multi.start(:on_error => :ignore) do |session|
-  args.each do |host|
-    session.use("root@#{host}")
-  end
+sshr = Net::SSHR.new({ :hosts => args })
+results = sshr.exec(cmd)
 
-  session.exec(cmd) do |ch, stream, data|
-    puts "#{ch[:host]}: [#{stream}] #{data}"
-  end
-
-  session.loop
+results.each do |r|
+  format = "[%s] %-15.15s %s\n"
+  output = r[:stdout] || r[:stderr]
+  printf format, r[:code], r[:host] + ':', output.chomp
 end
 
