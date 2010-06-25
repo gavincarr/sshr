@@ -39,7 +39,7 @@ results = sshr.exec(cmd)
 
 results.each do |r|
   format = "[%s] %-15.15s %s\n"
-  output = r[:stdout] || r[:stderr]
+  output = r[:stdout] || r[:stderr] || ''
   printf format, r[:code], r[:host] + ':', output.chomp
 end
 

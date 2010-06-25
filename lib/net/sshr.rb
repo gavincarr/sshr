@@ -28,8 +28,10 @@ module Net
         channel.wait
 
         channel.each do |ch|
-          @result_data[ch[:host]][:code] = ch[:exit_status]
-          @result_set.push(@result_data[ch[:host]])
+          host = ch[:host]
+          @result_data[host] ||= { :host => host }
+          @result_data[host][:code] = ch[:exit_status]
+          @result_set.push(@result_data[host])
         end
 
         session.loop
