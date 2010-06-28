@@ -10,7 +10,9 @@ module Net
       raise "Required :hosts argument missing" if @defaults[:hosts].empty?
     end
 
-    def exec(cmd)
+    def exec(cmd, &block)
+      raise "Required command argument go exec missing" if not cmd
+
       @result_set = []
       @result_data = {}
 
@@ -31,12 +33,17 @@ module Net
           host = ch[:host]
           @result_data[host] ||= { :host => host }
           @result_data[host][:code] = ch[:exit_status]
-          @result_set.push(@result_data[host])
+          if block_given?
+            yield @result_data[host]
+          else
+            @result_set.push(@result_data[host])
+          end
         end
 
         session.loop
       end
 
+      return if block
       return @result_set
     end
   end
