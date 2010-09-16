@@ -22,10 +22,10 @@ op.on('-?', '-h', '--help') do
   exit
 end
 op.on('-l', '--long', "Report long/full command output") do
-  options[:fmt] = 'long'
+  options[:fmt] = :long
 end
 op.on('-s', '--short', "Report short command output") do
-  options[:fmt] = 'short'
+  options[:fmt] = :short
 end
 #op.on('-f', '--fmt', '--format', String, "Formatter to use for reporting") do |val|
 #  options[:fmt] = val

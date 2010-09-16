@@ -14,17 +14,17 @@ class Net::SSHR::Formatter
     res[:stderr].chomp!
 
     # Default formatter: use short for single lines, otherwise long
-    @options[:fmt] ||= res[:stdout] =~ /\n/ ? 'long' : 'short'
+    @options[:fmt] ||= res[:stdout] =~ /\n/ ? :long : :short
 
     # Default oe_selector: both stdout/stderr in long mode, stdout or stderr in short
-    @options[:oe_selector] ||= @options[:fmt] == 'long' ? :oe_b : :oe_x; 
+    @options[:oe_selector] ||= @options[:fmt] == :long ? :oe_b : :oe_x; 
 
     method(@options[:fmt]).call(res)
   end
 
   # Render the given set of results
   def render_all(res_set)
-    # If we're doing the whole set and :fmt is 'short', adapt hostwidth
+    # If we're doing the whole set and :fmt is :short, adapt hostwidth
     @options[:hostwidth] = 1
     res_set.each do |res|
       res_hostwidth = res[:host].length + 2
