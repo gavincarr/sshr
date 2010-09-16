@@ -5,28 +5,43 @@
 
 require 'optparse'
 
-$LOAD_PATH.unshift File.join(File.dirname(__FILE__), 'lib')
+$LOAD_PATH.unshift File.join(File.dirname(__FILE__), '..', 'lib')
 require 'net/sshr'
+require 'net/sshr/formatter'
 
 $stdout.sync = true
 
+options = {}
+
 # Parse options
-opts = OptionParser.new
-opts.banner = "Usage: sshr [options] <host1> [<host2> ...] <cmd>"
-opts.on('-?', '-h', '--help') do
-  puts opts
+op = OptionParser.new
+op.banner = "Usage: sshr [options] <host1> [<host2> ...] <cmd>"
+op.on('-?', '-h', '--help') do
+  puts op
   exit
+end
+op.on('-l', '--long', "Report long/full command output") do
+  options[:fmt] = 'long'
+end
+op.on('-s', '--short', "Report short command output") do
+  options[:fmt] = 'short'
+end
+op.on('-m', '--merge', "Report merged command output") do
+  options[:fmt] = 'merge'
+end
+op.on('-f', '--fmt', '--format', String, "Formatter to use for reporting") do |val|
+  options[:fmt] = val
 end
 
 begin
-  args = opts.parse(ARGV)
+  args = op.parse(ARGV)
 rescue => e
   puts "Error: " << e
-  puts opts
+  puts op
   exit
 end
 if args.length < 2:
-  puts opts
+  puts op
   exit
 end
 
@@ -37,9 +52,8 @@ cmd = args.pop
 trap("INT") { puts; exit }
 
 sshr = Net::SSHR.new({ :hosts => args })
-sshr.exec(cmd) do |r|
-  format = "[%s] %-15.15s %s\n"
-  output = r[:stdout] || r[:stderr] || ''
-  printf format, r[:code], r[:host] + ':', output.chomp
+fmt = Net::SSHR::Formatter.new(options)
+sshr.exec(cmd) do |res|
+  fmt.render(res)
 end
 
