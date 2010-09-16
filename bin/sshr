@@ -24,7 +24,7 @@ end
 op.on('-l', '--long', "Report long/full command output") do
   options[:fmt] = :long
 end
-op.on('-s', '--short', "Report short command output") do
+op.on('-s', '--short', "Report short command output (first line only)") do
   options[:fmt] = :short
 end
 #op.on('-f', '--fmt', '--format', String, "Formatter to use for reporting") do |val|
@@ -39,16 +39,16 @@ end
 op.on('-e', '--err', '--stderr', "Show only stderr, not stdout") do
   options[:oe_selector].push(:oe_e)
 end
-op.on('-b', '--oeb', '--oe', "Show both stdout and stderr") do
+op.on('-b', '--oeb', '--oe', "Show both stdout and stderr (default with --long)") do
   options[:oe_selector].push(:oe_b)
 end
-op.on('-x', '--oex', "Show either stdout or stderr, but not both (xor)") do
+op.on('-x', '--oex', "Show either stdout or stderr, but not both (xor) (default with --short)") do
   options[:oe_selector].push(:oe_x)
 end
 op.on('--stream', "Annotate stdout and stderr streams to distinguish them") do
   options[:stream] = true
 end
-op.on('-v', '--verbose', "More verbose output (debugging)") do
+op.on('-v', '--verbose', "More verbose output (for debugging)") do
   options[:verbose] = true
   $stderr.sync = true
 end
