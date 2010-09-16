@@ -8,6 +8,7 @@ require 'optparse'
 $LOAD_PATH.unshift File.join(File.dirname(__FILE__), '..', 'lib')
 require 'net/sshr'
 require 'net/sshr/formatter'
+require 'net/sshr/merger'
 
 $stdout.sync = true
 
@@ -26,11 +27,11 @@ end
 op.on('-s', '--short', "Report short command output") do
   options[:fmt] = 'short'
 end
-op.on('-m', '--merge', "Report merged command output") do
-  options[:fmt] = 'merge'
-end
 op.on('-f', '--fmt', '--format', String, "Formatter to use for reporting") do |val|
   options[:fmt] = val
+end
+op.on('-m', '--merge', "Report merged command output") do
+  options[:merge] = true
 end
 
 begin
@@ -46,14 +47,26 @@ if args.length < 2:
 end
 
 cmd = args.pop
-#puts "hosts: #{args.join(' ')}"
-#puts "cmd:   #{cmd}"
 
 trap("INT") { puts; exit }
 
-sshr = Net::SSHR.new({ :hosts => args })
-fmt = Net::SSHR::Formatter.new(options)
+sshr   = Net::SSHR.new({ :hosts => args })
+fmt    = Net::SSHR::Formatter.new(options)
+merger = Net::SSHR::Merger.new
+
+# exec cmd on all hosts, reporting results as them come in
 sshr.exec(cmd) do |res|
-  fmt.render(res)
+  if options[:merge]:
+    merger.merge(res)
+  else
+    fmt.render(res)
+  end
+end
+
+# in merge mode, report merged output at end
+if options[:merge]:
+  merger.each do |res|
+    fmt.render(res)
+  end
 end
 
