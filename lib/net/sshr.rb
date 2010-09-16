@@ -5,9 +5,9 @@ require 'net/ssh/multi'
 module Net
   class SSHR
     def initialize(options)
-      @defaults = { :hosts => [] }
-      @defaults.merge!(options)
-      raise "Required :hosts argument missing" if @defaults[:hosts].empty?
+      @options = { :hosts => [] }
+      @options.merge!(options)
+      raise "Required :hosts argument missing" if @options[:hosts].empty?
     end
 
     # exec the given cmd on all hosts, executing block with each host's results
@@ -23,7 +23,7 @@ module Net
       # TODO: don't ignore errors
       Net::SSH::Multi.start(:on_error => :ignore) do |session|
         # Define users and servers to connect to, and initialise @result_data
-        @defaults[:hosts].each do |host|
+        @options[:hosts].each do |host|
           session.use("root@#{host}")
           @result_data[host] = { :host => host, :stdout => '', :stderr => '' }
         end
@@ -49,6 +49,9 @@ module Net
           # Callback on channel close, yielding results
           channel.on_close do |channel|
             host = channel[:host]
+            if @options[:verbose]:
+              $stderr.puts "+ channel close for host #{host}, yielding results"
+            end
             yield @result_data[host]
           end
 
@@ -59,11 +62,10 @@ module Net
               @result_data[host][:stderr] += "exec on #{host} failed!"
               @result_data[host][:exit_status] ||= 255
               yield @result_data[host]
+            elsif @options[:verbose]:
+              $stderr.puts "+ exec on host #{host} begun"
             end
           end
-
-          # Wait for all channels
-          channel.wait
         end
 
         # Run the event loop

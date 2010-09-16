@@ -48,22 +48,26 @@ end
 op.on('--stream', "Annotate stdout and stderr streams to distinguish them") do
   options[:stream] = true
 end
+op.on('-v', '--verbose', "More verbose output (debugging)") do
+  options[:verbose] = true
+  $stderr.sync = true
+end
 
 begin
   args = op.parse(ARGV)
 rescue => e
-  puts "Error: " << e
-  puts op
+  $stderr.puts "Error: " << e
+  $stderr.puts op
   exit
 end
 if args.length < 2:
-  puts "Error: must supply at least two arguments"
-  puts op
+  $stderr.puts "Error: must supply at least two arguments"
+  $stderr.puts op
   exit
 end
 if options[:oe_selector].length > 1
-  puts "Error: multiple stdout/stderr options given"
-  puts op
+  $stderr.puts "Error: multiple stdout/stderr options given"
+  $stderr.puts op
   exit
 else
    options[:oe_selector] =  options[:oe_selector][0]
@@ -73,7 +77,7 @@ cmd = args.pop
 
 trap("INT") { puts; exit }
 
-sshr   = Net::SSHR.new({ :hosts => args })
+sshr   = Net::SSHR.new({ :hosts => args, :verbose => options[:verbose] })
 fmt    = Net::SSHR::Formatter.new(options)
 merger = Net::SSHR::Merger.new
 
@@ -87,5 +91,8 @@ sshr.exec(cmd) do |res|
 end
 
 # In merge mode, report merged output at end
-fmt.render_all(merger) if options[:merge]
+if options[:merge]:
+  $stderr.puts "+ execs completed, merging results" if options[:verbose]
+  fmt.render_all(merger) 
+end
 
