@@ -12,7 +12,7 @@ require 'net/sshr/merger'
 
 $stdout.sync = true
 
-options = {}
+options = { :oe_selector => [] }
 
 # Parse options
 op = OptionParser.new
@@ -27,11 +27,26 @@ end
 op.on('-s', '--short', "Report short command output") do
   options[:fmt] = 'short'
 end
-op.on('-f', '--fmt', '--format', String, "Formatter to use for reporting") do |val|
-  options[:fmt] = val
-end
-op.on('-m', '--merge', "Report merged command output") do
+#op.on('-f', '--fmt', '--format', String, "Formatter to use for reporting") do |val|
+#  options[:fmt] = val
+#end
+op.on('-m', '--merge', "Merge output before reporting") do
   options[:merge] = true
+end
+op.on('-o', '--out', '--stdout', "Show only stdout, not stderr") do
+  options[:oe_selector].push(:oe_o)
+end
+op.on('-e', '--err', '--stderr', "Show only stderr, not stdout") do
+  options[:oe_selector].push(:oe_e)
+end
+op.on('-b', '--oeb', '--oe', "Show both stdout and stderr") do
+  options[:oe_selector].push(:oe_b)
+end
+op.on('-x', '--oex', "Show either stdout or stderr, but not both (xor)") do
+  options[:oe_selector].push(:oe_x)
+end
+op.on('--stream', "Annotate stdout and stderr streams to distinguish them") do
+  options[:stream] = true
 end
 
 begin
@@ -42,8 +57,16 @@ rescue => e
   exit
 end
 if args.length < 2:
+  puts "Error: must supply at least two arguments"
   puts op
   exit
+end
+if options[:oe_selector].length > 1
+  puts "Error: multiple stdout/stderr options given"
+  puts op
+  exit
+else
+   options[:oe_selector] =  options[:oe_selector][0]
 end
 
 cmd = args.pop

@@ -2,7 +2,7 @@
 
 class Net::SSHR::Formatter
   def initialize(options)
-    @options = { :hostwidth => 20 } # defaults
+    @options = { :hostwidth => 20 }     # defaults
     @options.merge!(options)
   end
 
@@ -13,8 +13,11 @@ class Net::SSHR::Formatter
     res[:stderr] ||= ''
     res[:stderr].chomp!
 
-    # Smart default formatter: use short for single lines, otherwise long
+    # Default formatter: use short for single lines, otherwise long
     @options[:fmt] ||= res[:stdout] =~ /\n/ ? 'long' : 'short'
+
+    # Default oe_selector: both stdout/stderr in long mode, stdout or stderr in short
+    @options[:oe_selector] ||= @options[:fmt] == 'long' ? :oe_b : :oe_x; 
 
     self.method(@options[:fmt]).call(res)
   end
@@ -34,20 +37,47 @@ class Net::SSHR::Formatter
     res_set.each { |res| self.render(res) }
   end
 
+  def display_stdout(stdout)
+    return false if stdout == ''
+    return false if @options[:oe_selector] == :oe_e
+    return true
+  end
+
+  def display_stderr(stderr, stdout)
+    return false if stderr == ''
+    return false if @options[:oe_selector] == :oe_o
+    return false if @options[:oe_selector] == :oe_x and stdout != ''
+    return true
+  end
+
   private
 
   # Long output renderer
   def long(res)
+    display_stdout = self.display_stdout(res[:stdout])
+    display_stderr = self.display_stderr(res[:stderr], res[:stdout])
+
     puts "[#{res[:host]}]"
-    puts res[:stdout] if res[:stdout] != ''
-    puts if res[:stdout] != '' and res[:stderr] != ''
-    puts res[:stderr] if res[:stderr] != ''
+    puts res[:stdout] if display_stdout
+    if display_stdout and display_stderr:
+      puts 
+      puts '** STDERR **' if @options[:stream]
+    end
+    puts res[:stderr] if display_stderr
     puts
   end
 
   # Short output renderer
   def short(res)
-    printf "%-#{@options[:hostwidth]}s %s\n", res[:host] + ':', res[:stdout] if res[:stdout] != ''
+    fmt = "%-#{@options[:hostwidth]}s %s%s\n"
+    if self.display_stdout(res[:stdout]):
+      stdout = res[:stdout].sub(/\n.*/m, '')
+      printf fmt, res[:host] + ':', @options[:stream] ? '[O] ' : '', stdout
+    end
+    if self.display_stderr(res[:stderr], res[:stdout]):
+      stderr = res[:stderr].sub(/\n.*/m, '')
+      printf fmt, res[:host] + ':', @options[:stream] ? '[E] ' : '', stderr
+    end
   end
 end
 
