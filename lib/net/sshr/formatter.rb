@@ -2,7 +2,8 @@
 
 class Net::SSHR::Formatter
   def initialize(options)
-    @options = options
+    @options = { :hostwidth => 20 } # defaults
+    @options.merge!(options)
   end
 
   # Render the given result
@@ -18,6 +19,23 @@ class Net::SSHR::Formatter
     self.method(@options[:fmt]).call(res)
   end
 
+  # Render the given set of results
+  def render_all(res_set)
+    # If we're doing the whole set and :fmt is 'short', adapt hostwidth
+    @options[:hostwidth] = 1
+    res_set.each do |res|
+      res_hostwidth = res[:host].length + 2
+      if @options[:hostwidth] < res_hostwidth
+         @options[:hostwidth] = res_hostwidth
+      end
+    end
+
+    # Render each res
+    res_set.each { |res| self.render(res) }
+  end
+
+  private
+
   # Long output renderer
   def long(res)
     puts "[#{res[:host]}]"
@@ -29,8 +47,7 @@ class Net::SSHR::Formatter
 
   # Short output renderer
   def short(res)
-    format = "%-20.20s %s\n"
-    printf format, res[:host] + ':', res[:stdout] if res[:stdout] != ''
+    printf "%-#{@options[:hostwidth]}s %s\n", res[:host] + ':', res[:stdout] if res[:stdout] != ''
   end
 end
 

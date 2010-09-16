@@ -63,10 +63,6 @@ sshr.exec(cmd) do |res|
   end
 end
 
-# in merge mode, report merged output at end
-if options[:merge]:
-  merger.each do |res|
-    fmt.render(res)
-  end
-end
+# In merge mode, report merged output at end
+fmt.render_all(merger) if options[:merge]
 
