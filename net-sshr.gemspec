@@ -8,6 +8,7 @@ Gem::Specification.new do |s|
   s.version         = '0.0.1'
   s.author          = 'Gavin Carr'
   s.email           = 'gavin@openfusion.net'
+  s.homepage        = 'http://www.openfusion.net/tags/sshr'
   s.platform        = Gem::Platform::RUBY
   s.required_ruby_version   = '>= 1.8'
   s.files           = Dir['**/**']
