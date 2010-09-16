@@ -19,7 +19,7 @@ class Net::SSHR::Formatter
     # Default oe_selector: both stdout/stderr in long mode, stdout or stderr in short
     @options[:oe_selector] ||= @options[:fmt] == 'long' ? :oe_b : :oe_x; 
 
-    self.method(@options[:fmt]).call(res)
+    method(@options[:fmt]).call(res)
   end
 
   # Render the given set of results
@@ -34,7 +34,7 @@ class Net::SSHR::Formatter
     end
 
     # Render each res
-    res_set.each { |res| self.render(res) }
+    res_set.each { |res| render(res) }
   end
 
   def display_stdout(stdout)
@@ -54,8 +54,8 @@ class Net::SSHR::Formatter
 
   # Long output renderer
   def long(res)
-    display_stdout = self.display_stdout(res[:stdout])
-    display_stderr = self.display_stderr(res[:stderr], res[:stdout])
+    display_stdout = display_stdout(res[:stdout])
+    display_stderr = display_stderr(res[:stderr], res[:stdout])
 
     puts "[#{res[:host]}]"
     puts res[:stdout] if display_stdout
@@ -70,11 +70,11 @@ class Net::SSHR::Formatter
   # Short output renderer
   def short(res)
     fmt = "%-#{@options[:hostwidth]}s %s%s\n"
-    if self.display_stdout(res[:stdout]):
+    if display_stdout(res[:stdout]):
       stdout = res[:stdout].sub(/\n.*/m, '')
       printf fmt, res[:host] + ':', @options[:stream] ? '[O] ' : '', stdout
     end
-    if self.display_stderr(res[:stderr], res[:stdout]):
+    if display_stderr(res[:stderr], res[:stdout]):
       stderr = res[:stderr].sub(/\n.*/m, '')
       printf fmt, res[:host] + ':', @options[:stream] ? '[E] ' : '', stderr
     end

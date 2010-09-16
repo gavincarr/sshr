@@ -8,7 +8,7 @@ class Net::SSHR::Merger < Array
     res[:stderr].chomp!
 
     added = false
-    self.each do |merged|
+    each do |merged|
       if merged[:stdout] == res[:stdout] and merged[:stderr] == res[:stderr]:
         merged[:host] += " #{res[:host]}"
         added = true
@@ -16,7 +16,7 @@ class Net::SSHR::Merger < Array
       end
     end
 
-    self.push res if not added
+    push res if not added
   end
 end
 
