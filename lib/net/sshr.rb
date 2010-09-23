@@ -20,16 +20,22 @@ module Net
       raise "Required command argument to exec missing" if not cmd
       raise "Required block argument to exec missing" if not block
 
-      # @result_data is a hash keyed by host, where each entry is another
-      # hash containing stdout, stderr, and exit_code elements
-      # TODO: make the entries a proper class
+      # @result_data is a hash keyed by hostname of Net::SSH::Result objects
       @result_data = {}
 
       Net::SSH::Multi.start(:on_error => :warn) do |session|
         # Define users and servers to connect to, and initialise @result_data
         @options[:hosts].each do |host|
-          session.use("root@#{host}")
-          @result_data[host] = Net::SSHR::Result.new( host )
+          # TODO: figure how to do user + ssh options stuff properly
+          if (host =~ /@/):
+            session_host = host
+            hostname = host.sub(/^.*@/, '')
+          else
+            session_host = "root@#{host}"
+            hostname = host
+          end
+          session.use(session_host)
+          @result_data[hostname] = Net::SSHR::Result.new(hostname)
         end
 
         # Execute cmd on all servers
