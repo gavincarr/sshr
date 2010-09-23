@@ -1,6 +1,7 @@
 # Net::SSHR class, wrapper around Net::SSH::Multi
 
 require 'net/ssh/multi'
+require 'net/sshr/result'
 
 module Net
   class SSHR
@@ -28,7 +29,7 @@ module Net
         # Define users and servers to connect to, and initialise @result_data
         @options[:hosts].each do |host|
           session.use("root@#{host}")
-          @result_data[host] = { :host => host, :stdout => '', :stderr => '' }
+          @result_data[host] = Net::SSHR::Result.new( host )
         end
 
         # Execute cmd on all servers
@@ -36,17 +37,17 @@ module Net
           # Callbacks to capture stdout and stderr
           channel.on_data do |channel, data|
             host = channel[:host]
-            @result_data[host][:stdout] += data
+            @result_data[host].append_stdout(data)
           end
           channel.on_extended_data do |channel, type, data|
             host = channel[:host]
-            @result_data[host][:stderr] += data
+            @result_data[host].append_stderr(data)
           end
 
           # Callback to capture exit status
           channel.on_request("exit-status") do |channel, data|
             host = channel[:host]
-            @result_data[host][:exit_status] = data.read_long
+            @result_data[host].exit_code = data.read_long
           end
 
           # Callback on channel close, yielding results
@@ -62,8 +63,8 @@ module Net
           channel.exec cmd do |channel, success|
             host = channel[:host]
             if not success:
-              @result_data[host][:stderr] += "exec on #{host} failed!"
-              @result_data[host][:exit_status] ||= 255
+              @result_data[host].append_stderr("exec on #{host} failed!")
+              @result_data[host].exit_status ||= 255
               yield @result_data[host]
             elsif @options[:verbose]:
               $stderr.puts "+ exec on host #{host} begun"
