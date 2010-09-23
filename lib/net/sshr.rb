@@ -20,8 +20,7 @@ module Net
       # TODO: make the entries a proper class
       @result_data = {}
 
-      # TODO: don't ignore errors
-      Net::SSH::Multi.start(:on_error => :ignore) do |session|
+      Net::SSH::Multi.start(:on_error => :warn) do |session|
         # Define users and servers to connect to, and initialise @result_data
         @options[:hosts].each do |host|
           session.use("root@#{host}")
