@@ -27,9 +27,9 @@ end
 op.on('-s', '--short', "Report short command output (first line only)") do
   options[:fmt] = :short
 end
-#op.on('-f', '--fmt', '--format', String, "Formatter to use for reporting") do |val|
-#  options[:fmt] = val
-#end
+op.on('--json', "Report results as json") do
+  options[:fmt] = :json
+end
 op.on('-m', '--merge', "Merge output before reporting") do
   options[:merge] = true
 end
@@ -48,6 +48,9 @@ end
 op.on('--stream', "Annotate stdout and stderr streams to distinguish them") do
   options[:stream] = true
 end
+#op.on('-f', '--fmt', '--format=FORMATTER', String, "Formatter to use for reporting") do |val|
+#  options[:fmt] = val
+#end
 op.on('-v', '--verbose', "More verbose output (for debugging)") do
   options[:verbose] = true
   $stderr.sync = true

@@ -77,5 +77,11 @@ class Net::SSHR::Formatter
       printf fmt, res.host + ':', @options[:stream] ? '[E] ' : '', stderr
     end
   end
+
+  # JSON renderer
+  def json(res)
+    require 'json'
+    puts res.to_json
+  end
 end
 

@@ -16,6 +16,15 @@ module Net
       def append_stderr(string)
         @stderr += string
       end
+      def to_json(*a)
+        {
+          'json_class'  => self.class.name,
+          'host'        => @host,
+          'stdout'      => @stdout,
+          'stderr'      => @stderr,
+          'exit_code'   => @exit_code,
+        }.to_json(*a)
+      end
     end
   end
 end
