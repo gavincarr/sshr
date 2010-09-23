@@ -82,6 +82,7 @@ fmt    = Net::SSHR::Formatter.new(options)
 merger = Net::SSHR::Merger.new
 
 # exec cmd on all hosts, reporting results as them come in
+$stderr.puts "Running '#{cmd}' on #{args.length} hosts ...\n\n"
 sshr.exec(cmd) do |res|
   if options[:merge]:
     merger.merge(res)
