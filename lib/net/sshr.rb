@@ -10,6 +10,10 @@ module Net
       raise "Required :hosts argument missing" if @options[:hosts].empty?
     end
 
+    def hosts
+      @options[:hosts]
+    end
+
     # exec the given cmd on all hosts, executing block with each host's results
     def exec(cmd, &block)
       raise "Required command argument to exec missing" if not cmd
