@@ -27,7 +27,7 @@ end
 op.on('-s', '--short', "Report short command output (first line only)") do
   options[:fmt] = :short
 end
-op.on('--json', "Report results as json") do
+op.on('-j', '--json',  "Report results as json") do
   options[:fmt] = :json
 end
 op.on('-m', '--merge', "Merge output before reporting") do
@@ -85,7 +85,7 @@ fmt    = Net::SSHR::Formatter.new(options)
 merger = Net::SSHR::Merger.new
 
 # exec cmd on all hosts, reporting results as them come in
-$stderr.puts "Running '#{cmd}' on #{args.length} hosts ...\n\n"
+$stderr.puts "Running '#{cmd}' on #{args.length} hosts ...\n\n" if options[:verbose]
 sshr.exec(cmd) do |res|
   if options[:merge]:
     merger.merge(res)
