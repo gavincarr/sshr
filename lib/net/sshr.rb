@@ -5,14 +5,15 @@ require 'net/sshr/result'
 
 module Net
   class SSHR
-    def initialize(options)
-      @options = { :hosts => [] }
-      @options.merge!(options)
-      raise "Required :hosts argument missing" if @options[:hosts].empty?
+    def initialize(hosts = [], options = {})
+      @hosts = hosts
+      @options = options
+      raise "Required 'hosts' argument missing" if ! @hosts or @hosts.empty?
+      raise "Invalid 'hosts' argument - must be Array" if @hosts and ! @hosts.is_a?(Array)
     end
 
     def hosts
-      @options[:hosts]
+      @hosts
     end
 
     # exec the given cmd on all hosts, executing block with each host's results
@@ -25,7 +26,7 @@ module Net
 
       Net::SSH::Multi.start(:on_error => :warn) do |session|
         # Define users and servers to connect to, and initialise @result_data
-        @options[:hosts].each do |host|
+        @hosts.each do |host|
           # TODO: figure how to do user + ssh options stuff properly
           if (host =~ /@/):
             session_host = host

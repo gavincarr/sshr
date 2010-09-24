@@ -4,17 +4,17 @@ require 'net/sshr/result'
 
 class TestNetSSHR < Test::Unit::TestCase
   def test_good_constructor
-    @sshr = Net::SSHR.new( :hosts => [ 'foo', 'bar' ] )
+    @sshr = Net::SSHR.new([ 'foo', 'bar' ])
     assert_not_nil @sshr
-    assert_equal @sshr.hosts, [ 'foo', 'bar' ]
+    assert_equal [ 'foo', 'bar' ], @sshr.hosts
   end
   def test_invalid_constructor
     assert_raise(ArgumentError, RuntimeError) { Net::SSHR.new }
-    assert_raise(ArgumentError, RuntimeError) { Net::SSHR.new( :foo => 1 ) }
+    assert_raise(ArgumentError, RuntimeError) { Net::SSHR.new('foo') }
   end
   def test_good_exec
     # TODO: mock this, rather than requiring a localhost with date(1)
-    @sshr = Net::SSHR.new( :hosts => 'localhost' )
+    @sshr = Net::SSHR.new([ 'localhost' ])
     assert_not_nil @sshr
     @sshr.exec('date') do |result|
       assert_not_nil result

@@ -80,7 +80,7 @@ cmd = args.pop
 
 trap("INT") { puts; exit }
 
-sshr   = Net::SSHR.new({ :hosts => args, :verbose => options[:verbose] })
+sshr   = Net::SSHR.new(args, { :verbose => options[:verbose] })
 fmt    = Net::SSHR::Formatter.new(options)
 merger = Net::SSHR::Merger.new
 
