@@ -5,10 +5,10 @@ class TestNetSSHRResult < Test::Unit::TestCase
   def test_good_constructor
     @res = Net::SSHR::Result.new('foo')
     assert_not_nil @res
-    assert_equal @res.host, 'foo'
-    assert_equal @res.stdout, ''
-    assert_equal @res.stderr, ''
-    assert_equal @res.exit_code, ''
+    assert_equal 'foo', @res.host
+    assert_equal '', @res.stdout
+    assert_equal '', @res.stderr
+    assert_equal nil, @res.exit_code
   end
   def test_invalid_constructor
     assert_raise(ArgumentError, RuntimeError) { Net::SSHR::Result.new }
@@ -19,19 +19,19 @@ class TestNetSSHRResult < Test::Unit::TestCase
     @res.stdout = 'Hello World!'
     @res.stderr = 'Error: core dump'
     @res.exit_code = 1
-    assert_equal @res.host, 'bar'
-    assert_equal @res.stdout, 'Hello World!'
-    assert_equal @res.stderr, 'Error: core dump'
-    assert_equal @res.exit_code, 1
+    assert_equal 'bar', @res.host
+    assert_equal 'Hello World!', @res.stdout
+    assert_equal 'Error: core dump', @res.stderr
+    assert_equal 1, @res.exit_code
   end
-  def test_append_methods
+  def test_appending
     @res = Net::SSHR::Result.new('foo')
     @res.stdout = 'Hello';
-    @res.append_stdout(' World!');
-    @res.append_stderr('Error:');
-    @res.append_stderr(' core dump');
-    assert_equal @res.stdout, 'Hello World!'
-    assert_equal @res.stderr, 'Error: core dump'
+    @res.stdout << ' World!';
+    @res.stderr << 'Error:';
+    @res.stderr << ' core dump';
+    assert_equal 'Hello World!', @res.stdout
+    assert_equal 'Error: core dump', @res.stderr
   end
 end
 
