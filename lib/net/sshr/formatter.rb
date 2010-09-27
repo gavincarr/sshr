@@ -40,6 +40,8 @@ module Net
         result_set.each { |result| render(result) }
       end
 
+      private
+
       def display_stdout(stdout)
         return false if not stdout
         return false if @out_err_selector == :oe_err
@@ -52,8 +54,6 @@ module Net
         return false if @out_err_selector == :oe_xor and stdout
         return true
       end
-
-      private
 
       # Long output renderer
       def long(result)
