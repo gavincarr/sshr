@@ -2,8 +2,20 @@
 module Net
   class SSHR
 
-    # Net::SSHR::Formatter class, handling formatting of Net::SSHR::Results
+    # Net::SSHR::Formatter class, handling formatting of Net::SSHR::Result objects
     class Formatter
+
+      # Create a new formatter instance. 
+      # @format may be one of :long (full multi-line output), :short (show only the
+      # first line of output), or :json (format result as a serialised json hash).
+      # @out_err_selector may be one of the following:
+      # - :oe_out  - to display only the stdout stream
+      # - :oe_err  - to display only the stderr stream
+      # - :oe_both - to display both the stdout and stderr streams
+      # - :oe_xor  - to display the stdout stream if set, otherwise stderr
+      # The @annotate_flag is used to indicate whether to explicitly annotate the streams.
+      # The @hostwidth parameter indicates the length to use for the hostname field
+      # when @format == :short.
       def initialize(format = nil, out_err_selector = nil, annotate_flag = false, hostwidth = 20)
         @format = format
         @out_err_selector = out_err_selector
@@ -11,7 +23,7 @@ module Net
         @hostwidth = hostwidth
       end
 
-      # Render the given result
+      # Returns a formatted output string for the given result
       def render(result)
         result.stdout.chomp!
         result.stderr.chomp!
@@ -25,7 +37,7 @@ module Net
         method(@format).call(result)
       end
 
-      # Render the given set of results
+      # Returns a formatted output string for the given set of results
       def render_all(result_set)
         # If we're doing the whole set and :format is :short, adapt hostwidth
         @hostwidth = 1
@@ -60,33 +72,37 @@ module Net
         display_stdout = display_stdout(result.stdout)
         display_stderr = display_stderr(result.stderr, result.stdout)
 
-        puts "[#{result.host}]"
-        puts result.stdout if display_stdout
+        out = ''
+        out << "[#{result.host}]\n"
+        out << result.stdout + "\n" if display_stdout
         if display_stdout and display_stderr:
-          puts 
-          puts '** STDERR **' if @annotate_flag
+          out << "\n" 
+          out << "** STDERR **\n" if @annotate_flag
         end
-        puts result.stderr if display_stderr
-        puts
+        out << result.stderr + "\n" if display_stderr
+        out << "\n"
+        return out
       end
 
       # Short output renderer
       def short(result)
+        out = ''
         fmt = "%-#{@hostwidth}s %s%s\n"
         if display_stdout(result.stdout):
           stdout = result.stdout.sub(/\n.*/m, '')
-          printf fmt, result.host + ':', @annotate_flag ? '[O] ' : '', stdout
+          out << sprintf(fmt, result.host + ':', @annotate_flag ? '[O] ' : '', stdout)
         end
         if display_stderr(result.stderr, result.stdout):
           stderr = result.stderr.sub(/\n.*/m, '')
-          printf fmt, result.host + ':', @annotate_flag ? '[E] ' : '', stderr
+          out << sprintf(fmt, result.host + ':', @annotate_flag ? '[E] ' : '', stderr)
         end
+        return out
       end
 
       # JSON renderer
       def json(result)
         require 'json'
-        puts result.to_json
+        return result.to_json + "\n"
       end
     end
   end

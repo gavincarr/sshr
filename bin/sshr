@@ -90,13 +90,13 @@ sshr.exec(cmd) do |res|
   if options[:merge]:
     merger.merge(res)
   else
-    fmt.render(res)
+    print fmt.render(res)
   end
 end
 
 # In merge mode, report merged output at end
 if options[:merge]:
   $stderr.puts "+ execs completed, merging results" if options[:verbose]
-  fmt.render_all(merger) 
+  print fmt.render_all(merger) 
 end
 
