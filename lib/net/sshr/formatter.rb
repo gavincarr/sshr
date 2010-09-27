@@ -1,4 +1,4 @@
-# Net::SSHR::Formatter class
+# Net::SSHR::Formatter class, handling formatting of Net::SSHR::Results
 
 class Net::SSHR::Formatter
   def initialize(options)
