@@ -1,7 +1,6 @@
 # Net::SSHR class, wrapper around Net::SSH::Multi
 
 require 'net/ssh/multi'
-require 'net/sshr/result'
 
 module Net
   class SSHR
@@ -85,4 +84,6 @@ module Net
     end
   end
 end
+
+require 'net/sshr/result'
 
