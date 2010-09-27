@@ -22,34 +22,34 @@ op.on('-?', '-h', '--help') do
   exit
 end
 op.on('-l', '--long', "Report long/full command output") do
-  options[:fmt] = :long
+  options[:format] = :long
 end
 op.on('-s', '--short', "Report short command output (first line only)") do
-  options[:fmt] = :short
+  options[:format] = :short
 end
 op.on('-j', '--json',  "Report results as json") do
-  options[:fmt] = :json
+  options[:format] = :json
 end
 op.on('-m', '--merge', "Merge output before reporting") do
   options[:merge] = true
 end
 op.on('-o', '--out', '--stdout', "Show only stdout, not stderr") do
-  options[:oe_selector].push(:oe_o)
+  options[:oe_selector].push(:oe_out)
 end
 op.on('-e', '--err', '--stderr', "Show only stderr, not stdout") do
-  options[:oe_selector].push(:oe_e)
+  options[:oe_selector].push(:oe_err)
 end
 op.on('-b', '--oeb', '--oe', "Show both stdout and stderr (default with --long)") do
-  options[:oe_selector].push(:oe_b)
+  options[:oe_selector].push(:oe_both)
 end
 op.on('-x', '--oex', "Show either stdout or stderr, but not both (xor) (default with --short)") do
-  options[:oe_selector].push(:oe_x)
+  options[:oe_selector].push(:oe_xor)
 end
 op.on('--stream', "Annotate stdout and stderr streams to distinguish them") do
-  options[:stream] = true
+  options[:annotate_flag] = true
 end
 #op.on('-f', '--fmt', '--format=FORMATTER', String, "Formatter to use for reporting") do |val|
-#  options[:fmt] = val
+#  options[:format] = val
 #end
 op.on('-v', '--verbose', "More verbose output (for debugging)") do
   options[:verbose] = true
@@ -81,8 +81,8 @@ cmd = args.pop
 trap("INT") { puts; exit }
 
 sshr   = Net::SSHR.new(args, { :verbose => options[:verbose] })
-fmt    = Net::SSHR::Formatter.new(options)
-merger = Net::SSHR::Merger.new
+fmt    = Net::SSHR::Formatter.new(options[:format], options[:oe_selector], options[:annotate_flag])
+merger = Net::SSHR::Merger.new if options[:merge]
 
 # exec cmd on all hosts, reporting results as them come in
 $stderr.puts "Running '#{cmd}' on #{args.length} hosts ...\n\n" if options[:verbose]
