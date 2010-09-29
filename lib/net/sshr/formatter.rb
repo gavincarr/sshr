@@ -25,6 +25,7 @@ module Net
 
       # Returns a formatted output string for the given result
       def render(result)
+        raise ArgumentError, "Argument '#{result}' not a Net::SSHR::Result" unless result.is_a? Net::SSHR::Result
         result.stdout.chomp!
         result.stderr.chomp!
 
@@ -49,7 +50,9 @@ module Net
         end
 
         # Render each result
-        result_set.each { |result| render(result) }
+        out = ''
+        result_set.each { |result| out += render(result) }
+        return out
       end
 
       private
