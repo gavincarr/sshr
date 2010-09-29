@@ -58,15 +58,15 @@ module Net
       private
 
       def display_stdout(stdout)
-        return false if not stdout
+        return false if stdout == ''
         return false if @out_err_selector == :oe_err
         return true
       end
 
       def display_stderr(stderr, stdout)
-        return false if not stderr
+        return false if stderr == ''
         return false if @out_err_selector == :oe_out
-        return false if @out_err_selector == :oe_xor and stdout
+        return false if @out_err_selector == :oe_xor and stdout != ''
         return true
       end
 
