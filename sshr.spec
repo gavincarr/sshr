@@ -6,7 +6,7 @@
 Summary: Flexible ssh wrapper to execute commands on remote hosts
 Name: sshr
 Version: 0.4
-Release: 1%{?org_tag}%{?dist}
+Release: 2%{?org_tag}%{?dist}
 Group: Development/Languages
 License: GPLv2+ or Ruby
 URL: http://www.openfusion.net/tags/sshr
@@ -41,13 +41,6 @@ find %{buildroot}%{geminstdir}/bin -type f | xargs chmod a+x
 mkdir -p %{buildroot}%{_mandir}/man1
 rd2 -r rd/rd2man-lib.rb %{buildroot}%{geminstdir}/bin/sshr > %{buildroot}%{_mandir}/man1/sshr.1
 
-# Create gemdir/ri symlinks
-mkdir -p %{buildroot}%{gemdir}/ri
-cd %{buildroot}%{gemdir}/ri 
-for dir in ../doc/%{gemname}-%{version}/ri/*; do
-  test -d $dir && ln -s $dir
-done
-
 %clean
 rm -rf %{buildroot}
 
@@ -58,7 +51,6 @@ rm -rf %{buildroot}
 %doc %{gemdir}/doc/%{gemname}-%{version}
 %{gemdir}/cache/%{gemname}-%{version}.gem
 %{gemdir}/specifications/%{gemname}-%{version}.gemspec
-%{gemdir}/ri/*
 %{_mandir}/man1/*
 
 %changelog
