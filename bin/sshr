@@ -100,3 +100,46 @@ if options[:merge]:
   print fmt.render_all(merger) 
 end
 
+
+=begin
+
+= NAME
+
+sshr - an asynchronous ssh wrapper for executing a command on multiple hosts
+and collating and presenting command output
+
+= SYNOPSIS
+
+  sshr [options] <host1> [<host2> ...] <cmd>
+
+= DESCRIPTION
+
+sshr is an asynchronous ssh wrapper for executing a command on multiple hosts
+and collating and presenting any output and errors from the command.
+
+== OPTIONS
+
+    -l, --long                       Report long/full command output
+    -s, --short                      Report short command output (first line only)
+    -j, --json                       Report results as json
+    -m, --merge                      Merge output before reporting
+    -o, --out, --stdout              Show only stdout, not stderr
+    -e, --err, --stderr              Show only stderr, not stdout
+    -b, --oeb, --oe                  Show both stdout and stderr (default with --long)
+    -x, --oex                        Show either stdout or stderr, but not both (xor) (default with --short)
+        --stream                     Annotate stdout and stderr streams to distinguish them
+    -v, --verbose                    More verbose output (for debugging)
+
+= AUTHOR
+
+Gavin Carr <gavin@openfusion.com.au>
+
+= COPYRIGHT
+
+Copyright 2010 by Gavin Carr.
+
+This library is free software; you can redistribute it and/or modify it under the same 
+terms as ruby (see COPYING for details).
+
+=end
+
