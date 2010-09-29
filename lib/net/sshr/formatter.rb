@@ -1,6 +1,6 @@
 
 module Net
-  class SSHR
+  module SSHR
 
     # Net::SSHR::Formatter class, handling formatting of Net::SSHR::Result objects
     class Formatter

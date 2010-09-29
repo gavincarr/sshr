@@ -1,6 +1,6 @@
 
 module Net
-  class SSHR
+  module SSHR
 
     # Net::SSHR::Merger class, merging and tracking distinct result sets with their hosts
     class Merger < Array

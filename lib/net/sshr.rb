@@ -12,35 +12,27 @@ module Net
   # = SYNOPSIS
   #
   #   require 'net/sshr'
+  #   include SSHR
   #
-  #   sshr = Net::SSHR.new([ 'foo', 'bar' ], { :verbose => true })
-  #   sshr.exec('uptime') do |result|
+  #   sshr_exec(%w{ host1 host2 }, 'uptime') do |result|
   #     puts "#{result.host}: #{result.exit_code}"
   #     puts #{result.stdout}
   #   end
   #
-  class SSHR
-    attr_accessor :hosts
-
-    def initialize(hosts = [], options = {})
-      @hosts = hosts
-      @options = options
-      raise "Required 'hosts' argument missing" if ! @hosts or @hosts.empty?
-      raise "Invalid 'hosts' argument - must be Array" if @hosts and ! @hosts.is_a?(Array)
-    end
-
+  module SSHR
     # Run the given cmd on all hosts, executing block with each host's results
     # (a Net::SSHR::Result object).
-    def exec(cmd, &block)                     # yields: result
-      raise "Required command argument to exec missing" if not cmd
-      raise "Required block argument to exec missing" if not block
+    def sshr_exec(hosts, cmd, options = {}, &block)                     # yields: result
+      raise "Required block argument missing" if not block
+
+      hosts = [ hosts ] unless hosts.is_a? Array
 
       # @result_data is a hash keyed by hostname of Net::SSH::Result objects
       @result_data = {}
 
       Net::SSH::Multi.start(:on_error => :warn) do |session|
         # Define users and servers to connect to, and initialise @result_data
-        @hosts.each do |host|
+        hosts.each do |host|
           # TODO: figure how to do user + ssh options stuff properly
           if (host =~ /@/):
             session_host = host
@@ -74,7 +66,7 @@ module Net
           # Callback on channel close, yielding results
           channel.on_close do |channel|
             host = channel[:host]
-            if @options[:verbose]:
+            if options[:verbose]:
               $stderr.puts "+ channel close for host #{host}, yielding results"
             end
             yield @result_data[host]
@@ -87,7 +79,7 @@ module Net
               @result_data[host].stderr << "exec on #{host} failed!"
               @result_data[host].exit_status ||= 255
               yield @result_data[host]
-            elsif @options[:verbose]:
+            elsif options[:verbose]:
               $stderr.puts "+ exec on host #{host} begun"
             end
           end

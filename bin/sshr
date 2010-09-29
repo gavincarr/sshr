@@ -9,6 +9,7 @@ $LOAD_PATH.unshift File.join(File.dirname(__FILE__), '..', 'lib')
 require 'net/sshr'
 require 'net/sshr/formatter'
 require 'net/sshr/merger'
+include Net::SSHR
 
 $stdout.sync = true
 
@@ -80,13 +81,12 @@ cmd = args.pop
 
 trap("INT") { puts; exit }
 
-sshr   = Net::SSHR.new(args, { :verbose => options[:verbose] })
 fmt    = Net::SSHR::Formatter.new(options[:format], options[:oe_selector], options[:annotate_flag])
 merger = Net::SSHR::Merger.new if options[:merge]
 
 # exec cmd on all hosts, reporting results as them come in
 $stderr.puts "Running '#{cmd}' on #{args.length} hosts ...\n\n" if options[:verbose]
-sshr.exec(cmd) do |res|
+sshr_exec(args, cmd, { :verbose => options[:verbose] }) do |res|
   if options[:merge]:
     merger.merge(res)
   else

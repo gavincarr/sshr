@@ -1,6 +1,6 @@
 
 module Net
-  class SSHR
+  module SSHR
 
     # = ABSTRACT
     #
