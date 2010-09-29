@@ -20,18 +20,18 @@ module Net
   #   end
   #
   module SSHR
-    # Run the given cmd on all hosts, executing block with each host's results
+    # Run the given cmd on the given hosts, executing block with each host's results
     # (a Net::SSHR::Result object).
-    def sshr_exec(hosts, cmd, options = {}, &block)                     # yields: result
-      raise "Required block argument missing" if not block
+    def sshr_exec(hosts, cmd, options = {}, &block)             # yields: result
+      raise ArgumentError, "Required block argument missing" if not block
 
       hosts = [ hosts ] unless hosts.is_a? Array
 
-      # @result_data is a hash keyed by hostname of Net::SSH::Result objects
-      @result_data = {}
+      # result_data is a hash keyed by hostname of Net::SSH::Result objects
+      result_data = {}
 
       Net::SSH::Multi.start(:on_error => :warn) do |session|
-        # Define users and servers to connect to, and initialise @result_data
+        # Define users and servers to connect to, and initialise result_data
         hosts.each do |host|
           # TODO: figure how to do user + ssh options stuff properly
           if (host =~ /@/):
@@ -42,7 +42,7 @@ module Net
             hostname = host
           end
           session.use(session_host)
-          @result_data[hostname] = Net::SSHR::Result.new(hostname)
+          result_data[hostname] = Net::SSHR::Result.new(hostname)
         end
 
         # Execute cmd on all servers
@@ -50,17 +50,17 @@ module Net
           # Callbacks to capture stdout and stderr
           channel.on_data do |channel, data|
             host = channel[:host]
-            @result_data[host].stdout << data
+            result_data[host].stdout << data
           end
           channel.on_extended_data do |channel, type, data|
             host = channel[:host]
-            @result_data[host].stderr << data
+            result_data[host].stderr << data
           end
 
           # Callback to capture exit status
           channel.on_request("exit-status") do |channel, data|
             host = channel[:host]
-            @result_data[host].exit_code = data.read_long
+            result_data[host].exit_code = data.read_long
           end
 
           # Callback on channel close, yielding results
@@ -69,16 +69,16 @@ module Net
             if options[:verbose]:
               $stderr.puts "+ channel close for host #{host}, yielding results"
             end
-            yield @result_data[host]
+            yield result_data[host]
           end
 
           # Exec cmd on current channel
           channel.exec cmd do |channel, success|
             host = channel[:host]
             if not success:
-              @result_data[host].stderr << "exec on #{host} failed!"
-              @result_data[host].exit_status ||= 255
-              yield @result_data[host]
+              result_data[host].stderr << "exec on #{host} failed!"
+              result_data[host].exit_status ||= 255
+              yield result_data[host]
             elsif options[:verbose]:
               $stderr.puts "+ exec on host #{host} begun"
             end

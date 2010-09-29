@@ -1,2 +1,2 @@
-require 'test_net_sshr'
+require 'test_net_sshr_exec'
 require 'test_net_sshr_result'
