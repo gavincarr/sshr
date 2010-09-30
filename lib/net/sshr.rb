@@ -23,7 +23,7 @@ module Net
     # Run the given cmd on the given hosts, executing block with each host's results
     # (a Net::SSHR::Result object).
     def sshr_exec(hosts, cmd, options = {}, &block)             # yields: result
-      raise ArgumentError, "Required block argument missing" if not block
+      raise ArgumentError, "Required block argument missing" unless block
 
       hosts = [ hosts ] unless hosts.is_a? Array
 
@@ -93,7 +93,7 @@ module Net
     # Run the given list of host/command pairs, executing block with each result
     def sshr_exec_list(host_cmd_list, options = {}, &block)             # yields: result
       raise ArgumentError, "Argument host_cmd_list must be array" unless host_cmd_list.is_a? Array
-      raise ArgumentError, "Required block argument missing" if not block
+      raise ArgumentError, "Required block argument missing" unless block
 
       # cmd_data is a hash of cmds to be executed, keyed by server.hash
       cmd_data = {}
@@ -103,8 +103,12 @@ module Net
       Net::SSH::Multi.start(:on_error => :warn) do |session|
         # Define users and servers to connect to
         host_cmd_list.each do |host_cmd|
-          raise ArgumentError, "Invalid entry '" + host_cmd.join(',') + "' in host_cmd_list" \
-            unless host_cmd.is_a? Array and host_cmd.length == 2
+          if not host_cmd.is_a? Array:
+            raise ArgumentError, "Invalid entry '#{host_cmd}' in host_cmd_list"
+          elsif host_cmd.length != 2:
+            raise ArgumentError, "Invalid entry '" + host_cmd.join(',') + "' in host_cmd_list"
+          end
+
           (host, cmd) = host_cmd
 
           # TODO: figure how to do user + ssh options stuff properly
