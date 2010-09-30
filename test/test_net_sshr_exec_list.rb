@@ -7,6 +7,7 @@ class TestNetSSHR < Test::Unit::TestCase
   def test_exec
     # TODO: mock this, rather than requiring a localhost with date(1)
     sshr_exec_list([ 
+                     [ 'dns1', 'uptime' ],
                      [ 'dns1', 'hostname' ],
                      [ 'dns2', 'uname -r' ],
                      [ 'dns3', 'date' ],

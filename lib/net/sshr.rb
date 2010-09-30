@@ -99,7 +99,7 @@ module Net
       result_data = {}
 
       Net::SSH::Multi.start(:on_error => :warn) do |session|
-        # Define users and servers to connect to
+        # Setup server connections and result objects
         host_cmd_list.each do |host_cmd|
           if not host_cmd.is_a? Array:
             raise ArgumentError, "Invalid entry '#{host_cmd}' in host_cmd_list"
@@ -118,48 +118,92 @@ module Net
             hostname = host
           end
           server = session.use(session_host)
-          result_data[server.hash] = Net::SSHR::Result.new(hostname, cmd)
+
+          # Setup result objects to capture results, one per cmd per server
+          result_data[server.hash] ||= []
+          result_data[server.hash].push Net::SSHR::Result.new(hostname, cmd)
           $stderr.puts "+ [#{server.hash}] #{session_host} => #{cmd}" if options[:verbose]
         end
 
         session.open_channel do |channel|
           server = channel[:server]
-          cmd = result_data[server.hash].cmd
-          label = "#{server.user}@#{server.host} => #{cmd}"
+          server_channel_count = 0
 
-          # Setup exec on current channel
-          channel.exec cmd do |channel, success|
-            if not success:
-              result_data[server.hash].stderr << "exec on #{label} failed!"
-              result_data[server.hash].exit_status ||= 255
-              yield result_data[server.hash]
-            elsif options[:verbose]:
-              $stderr.puts "+ exec #{server.user}@#{server.host} => #{cmd}"
+          result_data[server.hash].each do |result|
+            cmd = result.cmd
+            label = "#{server.user}@#{server.host} => #{cmd}"
+            $stderr.puts "+ prep #{label}" if options[:verbose]
+            server_channel_count += 1
+
+            # open_channel only gives us one channel per server
+            # if we have more than that, we need to open additional channels manually
+            if server_channel_count > 1:
+              $stderr.puts "+ open new channel please for #{label}"
+              channel = server.session.open_channel do |channel|
+                channel.exec cmd do |channel, success|
+                  if not success:
+                    result.stderr << "exec on #{label} failed!"
+                    result.exit_code ||= 255
+                    yield result
+                  end
+
+                  # Callbacks to capture stdout and stderr
+                  channel.on_data do |channel, data|
+                    result.stdout << data
+                  end
+                  channel.on_extended_data do |channel, type, data|
+                    result.stderr << data
+                  end
+
+                  # Callback to capture exit status
+                  channel.on_request("exit-status") do |channel, data|
+                    result.exit_code = data.read_long
+                  end
+
+                # Callback on channel close, yielding results
+                channel.on_close do |channel|
+                  if options[:verbose]:
+  #                 $stderr.puts "+ channel close for #{label}, yielding results"
+                    $stderr.puts "+ stdout: #{result.stdout}"
+                  end
+                  yield result
+                end
+              end
+              end
+            else
+
+            # Setup exec on current channel
+            channel.exec cmd do |channel, success|
+              if not success:
+                result.stderr << "exec on #{label} failed!"
+                result.exit_code ||= 255
+                yield result
+              end
+
+              # Callbacks to capture stdout and stderr
+              channel.on_data do |channel, data|
+                result.stdout << data
+              end
+              channel.on_extended_data do |channel, type, data|
+                result.stderr << data
+              end
+
+              # Callback to capture exit status
+              channel.on_request("exit-status") do |channel, data|
+                result.exit_code = data.read_long
+              end
+
+              # Callback on channel close, yielding results
+              channel.on_close do |channel|
+                if options[:verbose]:
+#                 $stderr.puts "+ channel close for #{label}, yielding results"
+                  $stderr.puts "+ stdout: #{result.stdout}"
+                end
+                yield result
+              end
+            end
             end
           end
-
-          # Callbacks to capture stdout and stderr
-          channel.on_data do |channel, data|
-            result_data[server.hash].stdout << data
-          end
-          channel.on_extended_data do |channel, type, data|
-            result_data[server.hash].stderr << data
-          end
-
-          # Callback to capture exit status
-          channel.on_request("exit-status") do |channel, data|
-            result_data[server.hash].exit_code = data.read_long
-          end
-
-          # Callback on channel close, yielding results
-          channel.on_close do |channel|
-            if options[:verbose]:
-#             $stderr.puts "+ channel close for #{label}, yielding results"
-              $stderr.puts "+ stdout: #{result_data[server.hash].stdout}"
-            end
-            yield result_data[server.hash]
-          end
-
         end
 
         # Run the event loop
