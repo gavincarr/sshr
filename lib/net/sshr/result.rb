@@ -4,23 +4,24 @@ module Net
 
     # = ABSTRACT
     #
-    # Net::SSHR::Result class, encapsulating the result data from an individual host
+    # Net::SSHR::Result class, encapsulating command result data from an individual host
     #
     # = SYNOPSIS
     #
     #   require 'net/sshr/result'
     #
-    #   result = Net::SSHR::Result.new('myhost')
+    #   result = Net::SSHR::Result.new('myhost', 'some_cmd')
     #   result.stdout << "Hello World!\n"
     #
-    #   puts "#{result.host}: #{result.exit_code}"
+    #   puts "#{result.host} #{result.cmd}: #{result.exit_code}"
     #   puts result.to_json
     #
     class Result
-      attr_accessor :host, :stdout, :stderr, :exit_code
+      attr_accessor :host, :cmd, :stdout, :stderr, :exit_code
 
-      def initialize(host, stdout = '', stderr = '', exit_code = nil)
+      def initialize(host, cmd, stdout = '', stderr = '', exit_code = nil)
         @host = host
+        @cmd = cmd
         @stdout = stdout
         @stderr = stderr
         @exit_code = exit_code
@@ -32,6 +33,7 @@ module Net
         {
           'json_class'  => self.class.name,
           'host'        => @host,
+          'cmd'         => @cmd,
           'stdout'      => @stdout,
           'stderr'      => @stderr,
           'exit_code'   => @exit_code,

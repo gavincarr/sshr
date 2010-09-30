@@ -51,7 +51,7 @@ class TestSSHR < Test::Unit::TestCase
   end
 
   def test_json
-    json = "{\"stdout\":\"Output the first\\nOutput the second\\nOutput the third\",\"json_class\":\"Net::SSHR::Result\",\"stderr\":\"Error the first\\nError the second\\nError the third\",\"exit_code\":0,\"host\":\"localhost\"}\n"
+    json = "{\"stdout\":\"Output the first\\nOutput the second\\nOutput the third\",\"json_class\":\"Net::SSHR::Result\",\"stderr\":\"Error the first\\nError the second\\nError the third\",\"exit_code\":0,\"cmd\":\"/export/home/gavin/work/sshr/test/helper_test_cmd.rb\",\"host\":\"localhost\"}\n"
 
     cmd = "#{@sshr} --json localhost #{@dir}/helper_test_cmd.rb"
     IO.popen(cmd) { |io| assert_equal json, io.gets(nil) }

@@ -42,7 +42,7 @@ module Net
             hostname = host
           end
           session.use(session_host)
-          result_data[hostname] = Net::SSHR::Result.new(hostname)
+          result_data[hostname] = Net::SSHR::Result.new(hostname, cmd)
         end
 
         # Execute cmd on all servers
@@ -95,8 +95,6 @@ module Net
       raise ArgumentError, "Argument host_cmd_list must be array" unless host_cmd_list.is_a? Array
       raise ArgumentError, "Required block argument missing" unless block
 
-      # cmd_data is a hash of cmds to be executed, keyed by server.hash
-      cmd_data = {}
       # result_data is a hash of Net::SSH::Result objects, keyed by server.hash
       result_data = {}
 
@@ -120,14 +118,13 @@ module Net
             hostname = host
           end
           server = session.use(session_host)
-          cmd_data[server.hash] = cmd
-          result_data[server.hash] = Net::SSHR::Result.new(hostname)
+          result_data[server.hash] = Net::SSHR::Result.new(hostname, cmd)
           $stderr.puts "+ [#{server.hash}] #{session_host} => #{cmd}" if options[:verbose]
         end
 
         session.open_channel do |channel|
           server = channel[:server]
-          cmd = cmd_data[server.hash]
+          cmd = result_data[server.hash].cmd
           label = "#{server.user}@#{server.host} => #{cmd}"
 
           # Setup exec on current channel

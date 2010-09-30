@@ -3,9 +3,10 @@ require 'net/sshr/result'
 
 class TestNetSSHRResult < Test::Unit::TestCase
   def test_good_constructor
-    @res = Net::SSHR::Result.new('foo')
+    @res = Net::SSHR::Result.new('foo', 'ls -l')
     assert_not_nil @res
     assert_equal 'foo', @res.host
+    assert_equal 'ls -l', @res.cmd
     assert_equal '', @res.stdout
     assert_equal '', @res.stderr
     assert_equal nil, @res.exit_code
@@ -14,8 +15,9 @@ class TestNetSSHRResult < Test::Unit::TestCase
     assert_raise(ArgumentError, RuntimeError) { Net::SSHR::Result.new }
   end
   def test_accessors
-    @res = Net::SSHR::Result.new('foo')
+    @res = Net::SSHR::Result.new('bar', 'ls -l')
     @res.host = 'bar'
+    @res.cmd = 'ls -l'
     @res.stdout = 'Hello World!'
     @res.stderr = 'Error: core dump'
     @res.exit_code = 1
@@ -25,7 +27,7 @@ class TestNetSSHRResult < Test::Unit::TestCase
     assert_equal 1, @res.exit_code
   end
   def test_appending
-    @res = Net::SSHR::Result.new('foo')
+    @res = Net::SSHR::Result.new('foo', 'ls -l')
     @res.stdout = 'Hello';
     @res.stdout << ' World!';
     @res.stderr << 'Error:';
