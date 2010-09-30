@@ -118,54 +118,47 @@ module Net
           server = session.use(session_host)
           cmd_data[server.hash] = cmd
           result_data[server.hash] = Net::SSHR::Result.new(hostname)
-          if options[:verbose]:
-            $stderr.puts "+ host: #{host}"
-            $stderr.puts "+ cmd: #{cmd}"
-            $stderr.puts "+ session_host: #{session_host}"
-            $stderr.puts "+ server.hash: #{server.hash}"
-          end
+          $stderr.puts "+ [#{server.hash}] #{session_host} => #{cmd}" if options[:verbose]
         end
 
         session.open_channel do |channel|
+          server = channel[:server]
+          cmd = cmd_data[server.hash]
+          label = "#{server.user}@#{server.host} => #{cmd}"
+
+          # Setup exec on current channel
+          channel.exec cmd do |channel, success|
+            if not success:
+              result_data[server.hash].stderr << "exec on #{label} failed!"
+              result_data[server.hash].exit_status ||= 255
+              yield result_data[server.hash]
+            elsif options[:verbose]:
+              $stderr.puts "+ exec #{server.user}@#{server.host} => #{cmd}"
+            end
+          end
+
           # Callbacks to capture stdout and stderr
           channel.on_data do |channel, data|
-            server = channel[:server]
             result_data[server.hash].stdout << data
           end
           channel.on_extended_data do |channel, type, data|
-            server = channel[:server]
             result_data[server.hash].stderr << data
           end
 
           # Callback to capture exit status
           channel.on_request("exit-status") do |channel, data|
-            server = channel[:server]
             result_data[server.hash].exit_code = data.read_long
           end
 
           # Callback on channel close, yielding results
           channel.on_close do |channel|
-            server = channel[:server]
             if options[:verbose]:
-              $stderr.puts "+ channel close for host #{server.user}@#{server.host} => #{cmd_data[server.hash]}, yielding results"
+#             $stderr.puts "+ channel close for #{label}, yielding results"
               $stderr.puts "+ stdout: #{result_data[server.hash].stdout}"
             end
             yield result_data[server.hash]
           end
 
-          # Exec cmd on current channel
-          server = channel[:server]
-          cmd = cmd_data[server.hash]
-          channel.exec cmd do |channel, success|
-            server = channel[:server]
-            if not success:
-              result_data[server.hash].stderr << "exec on #{server.host} failed!"
-              result_data[server.hash].exit_status ||= 255
-              yield result_data[server.hash]
-            elsif options[:verbose]:
-              $stderr.puts "+ exec #{server.user}@#{server.host} => #{cmd} begun"
-            end
-          end
         end
 
         # Run the event loop
