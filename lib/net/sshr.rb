@@ -134,74 +134,19 @@ module Net
             label = "#{server.user}@#{server.host} => #{cmd}"
             $stderr.puts "+ prep #{label}" if options[:verbose]
             server_channel_count += 1
+            exec_block = gen_channel_exec_block(result, options, &block)
 
             # open_channel only gives us one channel per server
             # if we have more than that, we need to open additional channels manually
             if server_channel_count > 1:
-              $stderr.puts "+ open new channel please for #{label}"
+              $stderr.puts "+ opening new channel for #{label}" if options[:verbose]
               channel = server.session.open_channel do |channel|
-                channel.exec cmd do |channel, success|
-                  if not success:
-                    result.stderr << "exec on #{label} failed!"
-                    result.exit_code ||= 255
-                    yield result
-                  end
-
-                  # Callbacks to capture stdout and stderr
-                  channel.on_data do |channel, data|
-                    result.stdout << data
-                  end
-                  channel.on_extended_data do |channel, type, data|
-                    result.stderr << data
-                  end
-
-                  # Callback to capture exit status
-                  channel.on_request("exit-status") do |channel, data|
-                    result.exit_code = data.read_long
-                  end
-
-                  # Callback on channel close, yielding results
-                  channel.on_close do |channel|
-                    if options[:verbose]:
-#                     $stderr.puts "+ channel close for #{label}, yielding results"
-                      $stderr.puts "+ stdout: #{result.stdout}"
-                    end
-                    yield result
-                  end
-                end
+                channel.exec(cmd, &exec_block)
               end
 
             # Setup exec on current channel
             else
-              channel.exec cmd do |channel, success|
-                if not success:
-                  result.stderr << "exec on #{label} failed!"
-                  result.exit_code ||= 255
-                  yield result
-                end
-
-                # Callbacks to capture stdout and stderr
-                channel.on_data do |channel, data|
-                  result.stdout << data
-                end
-                channel.on_extended_data do |channel, type, data|
-                  result.stderr << data
-                end
-
-                # Callback to capture exit status
-                channel.on_request("exit-status") do |channel, data|
-                  result.exit_code = data.read_long
-                end
-
-                # Callback on channel close, yielding results
-                channel.on_close do |channel|
-                  if options[:verbose]:
-  #                 $stderr.puts "+ channel close for #{label}, yielding results"
-                    $stderr.puts "+ stdout: #{result.stdout}"
-                  end
-                  yield result
-                end
-              end
+              channel.exec(cmd, &exec_block)
             end
           end
         end
@@ -209,6 +154,38 @@ module Net
         # Run the event loop
         session.loop
       end
+    end
+
+    def gen_channel_exec_block(result, options, &block)
+      return lambda { |channel, success|
+        if not success:
+          result.stderr << "exec on #{label} failed!"
+          result.exit_code ||= 255
+          yield result
+        end
+
+        # Callbacks to capture stdout and stderr
+        channel.on_data do |channel, data|
+          result.stdout << data
+        end
+        channel.on_extended_data do |channel, type, data|
+          result.stderr << data
+        end
+
+        # Callback to capture exit status
+        channel.on_request("exit-status") do |channel, data|
+          result.exit_code = data.read_long
+        end
+
+        # Callback on channel close, yielding results
+        channel.on_close do |channel|
+          if options[:verbose]:
+#           $stderr.puts "+ channel close for #{label}, yielding results"
+            $stderr.puts "+ stdout: #{result.stdout}"
+          end
+          yield result
+        end
+      }
     end
   end
 end
