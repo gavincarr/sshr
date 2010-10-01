@@ -160,6 +160,39 @@ module Net
                     result.exit_code = data.read_long
                   end
 
+                  # Callback on channel close, yielding results
+                  channel.on_close do |channel|
+                    if options[:verbose]:
+#                     $stderr.puts "+ channel close for #{label}, yielding results"
+                      $stderr.puts "+ stdout: #{result.stdout}"
+                    end
+                    yield result
+                  end
+                end
+              end
+
+            # Setup exec on current channel
+            else
+              channel.exec cmd do |channel, success|
+                if not success:
+                  result.stderr << "exec on #{label} failed!"
+                  result.exit_code ||= 255
+                  yield result
+                end
+
+                # Callbacks to capture stdout and stderr
+                channel.on_data do |channel, data|
+                  result.stdout << data
+                end
+                channel.on_extended_data do |channel, type, data|
+                  result.stderr << data
+                end
+
+                # Callback to capture exit status
+                channel.on_request("exit-status") do |channel, data|
+                  result.exit_code = data.read_long
+                end
+
                 # Callback on channel close, yielding results
                 channel.on_close do |channel|
                   if options[:verbose]:
@@ -169,39 +202,6 @@ module Net
                   yield result
                 end
               end
-              end
-            else
-
-            # Setup exec on current channel
-            channel.exec cmd do |channel, success|
-              if not success:
-                result.stderr << "exec on #{label} failed!"
-                result.exit_code ||= 255
-                yield result
-              end
-
-              # Callbacks to capture stdout and stderr
-              channel.on_data do |channel, data|
-                result.stdout << data
-              end
-              channel.on_extended_data do |channel, type, data|
-                result.stderr << data
-              end
-
-              # Callback to capture exit status
-              channel.on_request("exit-status") do |channel, data|
-                result.exit_code = data.read_long
-              end
-
-              # Callback on channel close, yielding results
-              channel.on_close do |channel|
-                if options[:verbose]:
-#                 $stderr.puts "+ channel close for #{label}, yielding results"
-                  $stderr.puts "+ stdout: #{result.stdout}"
-                end
-                yield result
-              end
-            end
             end
           end
         end
