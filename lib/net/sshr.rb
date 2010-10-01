@@ -131,15 +131,14 @@ module Net
 
           result_data[server.hash].each do |result|
             cmd = result.cmd
-            label = "#{server.user}@#{server.host} => #{cmd}"
-            $stderr.puts "+ prep #{label}" if options[:verbose]
             server_channel_count += 1
             exec_block = gen_channel_exec_block(result, options, &block)
 
             # open_channel only gives us one channel per server
             # if we have more than that, we need to open additional channels manually
             if server_channel_count > 1:
-              $stderr.puts "+ opening new channel for #{label}" if options[:verbose]
+              $stderr.puts "+ opening new channel for #{server.user}@#{server.host} => #{cmd}" \
+                if options[:verbose]
               channel = server.session.open_channel do |channel|
                 channel.exec(cmd, &exec_block)
               end
@@ -159,7 +158,7 @@ module Net
     def gen_channel_exec_block(result, options, &block)
       return lambda { |channel, success|
         if not success:
-          result.stderr << "exec on #{label} failed!"
+          result.stderr << "exec on #{result.host} failed!"
           result.exit_code ||= 255
           yield result
         end
@@ -180,8 +179,7 @@ module Net
         # Callback on channel close, yielding results
         channel.on_close do |channel|
           if options[:verbose]:
-#           $stderr.puts "+ channel close for #{label}, yielding results"
-            $stderr.puts "+ stdout: #{result.stdout}"
+            $stderr.puts "+ stdout: #{result.stdout}" if options[:verbose]
           end
           yield result
         end
