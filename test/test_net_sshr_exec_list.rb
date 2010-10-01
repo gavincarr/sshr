@@ -11,7 +11,7 @@ class TestNetSSHR < Test::Unit::TestCase
                      [ 'dns1', 'hostname' ],
                      [ 'dns2', 'uname -r' ],
                      [ 'dns3', 'date' ],
-                   ], { :verbose => 1 }) do |result|
+                   ], { :verbose => false }) do |result|
       assert_not_nil result
       assert_kind_of Net::SSHR::Result, result
       assert_respond_to result, :stdout

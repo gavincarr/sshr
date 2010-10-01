@@ -13,7 +13,7 @@ class TestNetSSHR < Test::Unit::TestCase
       assert_respond_to result, :stderr
       assert_respond_to result, :exit_code
       assert_equal 'localhost', result.host
-      assert_match /^\w{3} \w{3} \d+/, result.stdout
+      assert_match /^\w{3}\s+\w{3}\s+\d+/, result.stdout
       assert_equal '', result.stderr
       assert_equal 0, result.exit_code
     end
@@ -24,7 +24,7 @@ class TestNetSSHR < Test::Unit::TestCase
       assert_respond_to result, :stderr
       assert_respond_to result, :exit_code
       assert_equal 'localhost', result.host
-      assert_match /^\w{3} \w{3} \d+/, result.stdout
+      assert_match /^\w{3}\s+\w{3}\s+\d+/, result.stdout
       assert_equal '', result.stderr
       assert_equal 0, result.exit_code
     end
