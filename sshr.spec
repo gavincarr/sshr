@@ -5,8 +5,8 @@
 
 Summary: Flexible ssh wrapper to execute commands on remote hosts
 Name: sshr
-Version: 0.4
-Release: 2%{?org_tag}%{?dist}
+Version: 0.5
+Release: 1%{?org_tag}%{?dist}
 Group: Development/Languages
 License: GPLv2+ or Ruby
 URL: http://www.openfusion.net/tags/sshr
@@ -54,6 +54,10 @@ rm -rf %{buildroot}
 %{_mandir}/man1/*
 
 %changelog
+* Mon Oct 04 2010 Gavin Carr <gavin@openfusion.com.au> - 0.5-1
+- Add sshr_exec_list method.
+- Convert Net::SSHR from class to module.
+
 * Wed Sep 29 2010 Gavin Carr <gavin@openfusion.com.au> - 0.4-1
 - Turn results into a proper class.
 - Tweak various interfaces to be more rubyesque.
