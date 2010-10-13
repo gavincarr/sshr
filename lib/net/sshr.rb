@@ -105,8 +105,8 @@ module Net
             # open_channel only gives us one channel per server
             # if we have more than that, we need to open additional channels manually
             if server_channel_count > 1:
-              $stderr.puts "+ opening new channel for #{server.user}@#{server.host} => #{cmd}" \
-                if options[:verbose]
+#             $stderr.puts "+ opening new channel for #{server.user}@#{server.host} => #{cmd}" \
+#               if options[:verbose]
               channel = server.session.open_channel do |channel|
                 channel.exec(cmd, &exec_block)
               end
