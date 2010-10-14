@@ -30,7 +30,8 @@ module Net
       # result_data is a hash keyed by hostname of Net::SSH::Result objects
       result_data = {}
 
-      Net::SSH::Multi.start(:on_error => :warn) do |session|
+      cc = options[:concurrent_connections]
+      Net::SSH::Multi.start(:on_error => :warn, :concurrent_connections => cc) do |session|
         # Setup server connections and result objects
         hosts.each do |host|
           # TODO: figure how to do user + ssh options stuff properly
@@ -66,7 +67,8 @@ module Net
       # result_data is a hash of Net::SSH::Result objects, keyed by server.hash
       result_data = {}
 
-      Net::SSH::Multi.start(:on_error => :warn) do |session|
+      cc = options[:concurrent_connections]
+      Net::SSH::Multi.start(:on_error => :warn, :concurrent_connections => cc) do |session|
         # Setup server connections and result objects
         host_cmd_list.each do |host_cmd|
           if not host_cmd.is_a? Array:
@@ -102,7 +104,7 @@ module Net
             server_channel_count += 1
             exec_block = gen_channel_exec_block(result, options, &block)
 
-            # open_channel only gives us one channel per server
+            # open_channel only ever allows us one channel per server
             # if we have more than that, we need to open additional channels manually
             if server_channel_count > 1:
 #             $stderr.puts "+ opening new channel for #{server.user}@#{server.host} => #{cmd}" \
