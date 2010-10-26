@@ -5,7 +5,7 @@
 
 Summary: Flexible ssh wrapper to execute commands on remote hosts
 Name: sshr
-Version: 0.5
+Version: 0.6
 Release: 1%{?org_tag}%{?dist}
 Group: Development/Languages
 License: GPLv2+ or Ruby
@@ -54,6 +54,10 @@ rm -rf %{buildroot}
 %{_mandir}/man1/*
 
 %changelog
+* Tue Oct 26 2010 Gavin Carr <gavin@openfusion.com.au> - 0.6-1
+- Simplify sshr_exec_list channel handling using Net::SSH::Multi :allow_duplicate_servers.
+- Change sshr_exec_list interface to flattened list.
+
 * Mon Oct 04 2010 Gavin Carr <gavin@openfusion.com.au> - 0.5-1
 - Add sshr_exec_list method.
 - Convert Net::SSHR from class to module.
