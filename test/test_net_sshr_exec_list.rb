@@ -6,12 +6,12 @@ include Net::SSHR
 class TestNetSSHR < Test::Unit::TestCase
   def test_exec
     # TODO: mock this, rather than requiring a unix localhost
-    sshr_exec_list([ 
-                     [ 'localhost', 'uptime' ],
-                     [ 'localhost', 'hostname' ],
-                     [ 'localhost', 'uname -r' ],
-                     [ 'localhost', 'date' ],
-                   ], { :verbose => false }) do |result|
+    sshr_exec_list(
+                   'localhost', 'uptime',
+                   'localhost', 'hostname',
+                   'localhost', 'uname -r',
+                   'localhost', 'date',
+                   { :verbose => false }) do |result|
       assert_not_nil result
       assert_kind_of Net::SSHR::Result, result
       assert_respond_to result, :stdout

@@ -14,7 +14,19 @@ module Net
   #   require 'net/sshr'
   #   include SSHR
   #
+  #   # Run a command on multiple hosts
   #   sshr_exec(%w{ host1 host2 }, 'uptime') do |result|
+  #     puts "#{result.host}: #{result.exit_code}"
+  #     puts #{result.stdout}
+  #   end
+  #
+  #   # Run arbitrary sets of host-command pairs
+  #   sshr_exec_list(
+  #                   'host1', 'uptime',
+  #                   'host1', 'rpm -q ruby',
+  #                   'host2', 'date',
+  #                   'host3', 'uname -r'
+  #                 ) do |result|
   #     puts "#{result.host}: #{result.exit_code}"
   #     puts #{result.stdout}
   #   end
@@ -56,8 +68,10 @@ module Net
     end
 
     # Run the given list of host/command pairs, executing block with each result
-    def sshr_exec_list(host_cmd_list, options = {}, &block)             # yields: result
-      raise ArgumentError, "Argument host_cmd_list must be array" unless host_cmd_list.is_a? Array
+    def sshr_exec_list(*args, &block)             # yields: result
+      options = args.last.is_a?(Hash) ? args.pop : {}
+
+      raise ArgumentError, "Not an even number of host-command arguments" unless args.length % 2 == 0
       raise ArgumentError, "Required block argument missing" unless block
 
       # result_data is a hash of Net::SSH::Result objects, keyed by server.object_id
@@ -69,14 +83,9 @@ module Net
                             :allow_duplicate_servers => true, 
                             :concurrent_connections => cc) do |session|
         # Setup server connections and result objects
-        host_cmd_list.each do |host_cmd|
-          if not host_cmd.is_a? Array:
-            raise ArgumentError, "Invalid entry '#{host_cmd}' in host_cmd_list"
-          elsif host_cmd.length != 2:
-            raise ArgumentError, "Invalid entry '" + host_cmd.join(',') + "' in host_cmd_list"
-          end
-
-          (host, cmd) = host_cmd
+        while args.length > 0 do
+          host = args.shift
+          cmd = args.shift
           hostname = host.sub(/^.*@/, '')
           server = session.use(host)
 
