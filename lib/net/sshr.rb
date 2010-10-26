@@ -32,19 +32,13 @@ module Net
 
       cc = options[:concurrent_connections]
       Net::SSH::Multi.start(:on_error => :warn, 
+                            :default_user => 'root',
                             :allow_duplicate_servers => true, 
                             :concurrent_connections => cc) do |session|
         # Setup server connections and result objects
         hosts.each do |host|
-          # TODO: figure how to do user + ssh options stuff properly
-          if (host =~ /@/):
-            session_host = host
-            hostname = host.sub(/^.*@/, '')
-          else
-            session_host = "root@#{host}"
-            hostname = host
-          end
-          server = session.use(session_host)
+          hostname = host.sub(/^.*@/, '')
+          server = session.use(host)
           result_data[server.object_id] = Net::SSHR::Result.new(hostname, cmd)
         end
 
@@ -71,6 +65,7 @@ module Net
 
       cc = options[:concurrent_connections]
       Net::SSH::Multi.start(:on_error => :warn, 
+                            :default_user => 'root',
                             :allow_duplicate_servers => true, 
                             :concurrent_connections => cc) do |session|
         # Setup server connections and result objects
@@ -82,16 +77,8 @@ module Net
           end
 
           (host, cmd) = host_cmd
-
-          # TODO: figure how to do user + ssh options stuff properly
-          if (host =~ /@/):
-            session_host = host
-            hostname = host.sub(/^.*@/, '')
-          else
-            session_host = "root@#{host}"
-            hostname = host
-          end
-          server = session.use(session_host)
+          hostname = host.sub(/^.*@/, '')
+          server = session.use(host)
 
           # Setup result objects to capture results, one per cmd per server
           result_data[server.object_id] ||= []
