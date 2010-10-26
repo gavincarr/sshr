@@ -31,7 +31,9 @@ module Net
       result_data = {}
 
       cc = options[:concurrent_connections]
-      Net::SSH::Multi.start(:on_error => :warn, :concurrent_connections => cc) do |session|
+      Net::SSH::Multi.start(:on_error => :warn, 
+                            :allow_duplicate_servers => true, 
+                            :concurrent_connections => cc) do |session|
         # Setup server connections and result objects
         hosts.each do |host|
           # TODO: figure how to do user + ssh options stuff properly
@@ -43,13 +45,13 @@ module Net
             hostname = host
           end
           server = session.use(session_host)
-          result_data[server.hash] = Net::SSHR::Result.new(hostname, cmd)
+          result_data[server.object_id] = Net::SSHR::Result.new(hostname, cmd)
         end
 
         # Execute cmd on all servers
         session.open_channel do |channel|
           server = channel[:server]
-          result = result_data[server.hash]
+          result = result_data[server.object_id]
           exec_block = gen_channel_exec_block(result, options, &block)
           channel.exec(cmd, &exec_block)
         end
@@ -64,11 +66,13 @@ module Net
       raise ArgumentError, "Argument host_cmd_list must be array" unless host_cmd_list.is_a? Array
       raise ArgumentError, "Required block argument missing" unless block
 
-      # result_data is a hash of Net::SSH::Result objects, keyed by server.hash
+      # result_data is a hash of Net::SSH::Result objects, keyed by server.object_id
       result_data = {}
 
       cc = options[:concurrent_connections]
-      Net::SSH::Multi.start(:on_error => :warn, :concurrent_connections => cc) do |session|
+      Net::SSH::Multi.start(:on_error => :warn, 
+                            :allow_duplicate_servers => true, 
+                            :concurrent_connections => cc) do |session|
         # Setup server connections and result objects
         host_cmd_list.each do |host_cmd|
           if not host_cmd.is_a? Array:
@@ -90,33 +94,17 @@ module Net
           server = session.use(session_host)
 
           # Setup result objects to capture results, one per cmd per server
-          result_data[server.hash] ||= []
-          result_data[server.hash].push Net::SSHR::Result.new(hostname, cmd)
-          $stderr.puts "+ [#{server.hash}] #{session_host} => #{cmd}" if options[:verbose]
+          result_data[server.object_id] ||= []
+          result_data[server.object_id].push Net::SSHR::Result.new(hostname, cmd)
+          $stderr.puts "+ [#{server.object_id}] #{session_host} => #{cmd}" if options[:verbose]
         end
 
         session.open_channel do |channel|
           server = channel[:server]
-          server_channel_count = 0
-
-          result_data[server.hash].each do |result|
+          result_data[server.object_id].each do |result|
             cmd = result.cmd
-            server_channel_count += 1
             exec_block = gen_channel_exec_block(result, options, &block)
-
-            # open_channel only ever allows us one channel per server
-            # if we have more than that, we need to open additional channels manually
-            if server_channel_count > 1:
-#             $stderr.puts "+ opening new channel for #{server.user}@#{server.host} => #{cmd}" \
-#               if options[:verbose]
-              channel = server.session.open_channel do |channel|
-                channel.exec(cmd, &exec_block)
-              end
-
-            # Setup exec on current channel
-            else
-              channel.exec(cmd, &exec_block)
-            end
+            channel.exec(cmd, &exec_block)
           end
         end
 
@@ -130,7 +118,7 @@ module Net
     def gen_channel_exec_block(result, options, &block)
       return lambda { |channel, success|
         if not success:
-          result.stderr << "exec on #{result.host} failed!"
+          result.stderr << "exec on #{result.host} #{result.cmd} failed!"
           result.exit_code ||= 255
           yield result
         end
