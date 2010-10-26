@@ -37,6 +37,7 @@ module Net
     def sshr_exec(hosts, cmd, options = {}, &block)             # yields: result
       raise ArgumentError, "Required block argument missing" unless block
 
+      options[:default_user] ||= 'root'
       hosts = [ hosts ] unless hosts.is_a? Array
 
       # result_data is a hash keyed by hostname of Net::SSH::Result objects
@@ -44,7 +45,7 @@ module Net
 
       cc = options[:concurrent_connections]
       Net::SSH::Multi.start(:on_error => :warn, 
-                            :default_user => 'root',
+                            :default_user => options[:default_user],
                             :allow_duplicate_servers => true, 
                             :concurrent_connections => cc) do |session|
         # Setup server connections and result objects
@@ -70,6 +71,7 @@ module Net
     # Run the given list of host/command pairs, executing block with each result
     def sshr_exec_list(*args, &block)             # yields: result
       options = args.last.is_a?(Hash) ? args.pop : {}
+      options[:default_user] ||= 'root'
 
       raise ArgumentError, "Not an even number of host-command arguments" unless args.length % 2 == 0
       raise ArgumentError, "Required block argument missing" unless block
@@ -79,7 +81,7 @@ module Net
 
       cc = options[:concurrent_connections]
       Net::SSH::Multi.start(:on_error => :warn, 
-                            :default_user => 'root',
+                            :default_user => options[:default_user],
                             :allow_duplicate_servers => true, 
                             :concurrent_connections => cc) do |session|
         # Setup server connections and result objects
