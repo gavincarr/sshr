@@ -27,6 +27,11 @@ module Net
         @exit_code = exit_code
       end
 
+      # Stringify to @stdout
+      def to_s
+        @stdout
+      end
+
       # Return current result data as a serialised json hash, with hash members
       # named after attributes
       def to_json(*a)

@@ -34,6 +34,8 @@ class TestNetSSHRResult < Test::Unit::TestCase
     @res.stderr << ' core dump';
     assert_equal 'Hello World!', @res.stdout
     assert_equal 'Error: core dump', @res.stderr
+    assert_equal 'Hello World!', @res.to_s
+    assert_equal 'Hello World!', "#{@res}"
   end
 end
 
