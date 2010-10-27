@@ -35,10 +35,11 @@ module Net
     # Run the given cmd on the given hosts, executing block with each host's results
     # (a Net::SSHR::Result object).
     def sshr_exec(hosts, cmd, options = {}, &block)             # yields: result
-      raise ArgumentError, "Required block argument missing" unless block
-
       options[:default_user] ||= 'root'
       hosts = [ hosts ] unless hosts.is_a? Array
+      if hosts.length > 1 and not block
+        raise ArgumentError, "Required block argument missing (more than one host)"
+      end
 
       # result_data is a hash keyed by hostname of Net::SSH::Result objects
       result_data = {}
@@ -66,6 +67,8 @@ module Net
         # Run the event loop
         session.loop
       end
+
+      return result_data[result_data.keys.first] if not block
     end
 
     # Run the given list of host/command pairs, executing block with each result
@@ -118,7 +121,7 @@ module Net
         if not success:
           result.stderr << "exec on #{result.host} #{result.cmd} failed!"
           result.exit_code ||= 255
-          yield result
+          yield result if block
         end
 
         # Callbacks to capture stdout and stderr
@@ -139,7 +142,7 @@ module Net
           if options[:verbose]:
             $stderr.puts "+ stdout: #{result.stdout}" if options[:verbose]
           end
-          yield result
+          yield result if block
         end
       }
     end
