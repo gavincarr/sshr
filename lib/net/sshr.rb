@@ -6,8 +6,8 @@ module Net
   # = ABSTRACT
   #
   # Net::SSHR is a simple wrapper around Net::SSH::Multi, optimised for the
-  # case where you wish to run a single command on multiple hosts, and
-  # collate and report the results.
+  # case where you wish to run a single command on multiple hosts, or a set
+  # of arbitrary host-command pairs, and then collate and report the results.
   #
   # = SYNOPSIS
   #
@@ -30,6 +30,10 @@ module Net
   #     puts "#{result.host}: #{result.exit_code}"
   #     puts #{result.stdout}
   #   end
+  #
+  #   # Trivial single-host usage
+  #   result = sshr_exec('host', 'date')
+  #   puts result
   #
   module SSHR
     # Run the given cmd on the given hosts, executing block with each host's results
