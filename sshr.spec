@@ -5,23 +5,32 @@
 
 Summary: Flexible ssh wrapper to execute commands on remote hosts
 Name: sshr
-Version: 0.6
+Version: 0.7
 Release: 1%{?org_tag}%{?dist}
-Group: Development/Languages
+Group: System/Application
 License: GPLv2+ or Ruby
 URL: http://www.openfusion.net/tags/sshr
 Source0: %{gemname}-%{version}.gem
 BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root-%(%{__id_u} -n)
+BuildRequires: rubygems, rdtool
+Requires: rubygem(%{gemname}) = %{version}
+BuildArch: noarch
+
+%description
+Flexible ssh wrapper to execute commands on remote hosts and render the
+output in nice ways.
+
+%package -n rubygem-%{gemname}
+Summary: SSH wrapper library to execute a command on multiple hosts
+Group: Development/Languages
 Requires: rubygems
 Requires: rubygem(net-ssh) >= 0
 Requires: rubygem(net-ssh-multi) >= 0
-BuildRequires: rubygems, rdtool
-BuildArch: noarch
 Provides: rubygem(%{gemname}) = %{version}
 
-%description
-Flexible ssh wrapper to execute commands on remote hosts and 
-render the output in nice ways.
+%description -n rubygem-%{gemname}
+An ssh wrapper library optimised for executing one or more commands on 
+multiple hosts.
 
 %prep
 
@@ -47,13 +56,22 @@ rm -rf %{buildroot}
 %files
 %defattr(-, root, root, -)
 %{_bindir}/*
+%{_mandir}/man1/*
+
+%files -n rubygem-%{gemname}
+%defattr(-, root, root, -)
 %{gemdir}/gems/%{gemname}-%{version}/
 %doc %{gemdir}/doc/%{gemname}-%{version}
 %{gemdir}/cache/%{gemname}-%{version}.gem
 %{gemdir}/specifications/%{gemname}-%{version}.gemspec
-%{_mandir}/man1/*
 
 %changelog
+* Thu Nov 25 2010 Gavin Carr <gavin@openfusion.com.au> - 0.7-1
+- Split out into separate rubygem-net-sshr and sshr packages.
+
+* Tue Oct 26 2010 Gavin Carr <gavin@openfusion.com.au> - 0.6.1-1
+- Add non-blocking single-host version of sshr_exec.
+
 * Tue Oct 26 2010 Gavin Carr <gavin@openfusion.com.au> - 0.6-1
 - Simplify sshr_exec_list channel handling using Net::SSH::Multi :allow_duplicate_servers.
 - Change sshr_exec_list interface to flattened list.
