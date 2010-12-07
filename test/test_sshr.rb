@@ -33,6 +33,8 @@ class TestSSHR < Test::Unit::TestCase
     outerr = "localhost:           Output the first\nlocalhost:           Error the first\n"
     out = "localhost:           Output the first\n"
     err = "localhost:           Error the first\n"
+    user = "localhost:           #{ENV['USER']}\n"
+    root = "localhost:           root\n"
 
     cmd = "#{@sshr} --short localhost #{@dir}/helper_test_cmd.rb"
     IO.popen(cmd) { |io| assert_equal out, io.gets(nil) }
@@ -48,6 +50,13 @@ class TestSSHR < Test::Unit::TestCase
 
     cmd = "#{@sshr} --short -x localhost #{@dir}/helper_test_cmd.rb"
     IO.popen(cmd) { |io| assert_equal out, io.gets(nil) }
+
+    # TODO: figure out how to mock this instead of requiring root ssh and whoami
+    cmd = "#{@sshr} localhost whoami"
+    IO.popen(cmd) { |io| assert_equal user, io.gets(nil) }
+
+    cmd = "#{@sshr} --user root localhost whoami"
+    IO.popen(cmd) { |io| assert_equal root, io.gets(nil) }
   end
 
   def test_json

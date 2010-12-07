@@ -22,6 +22,9 @@ op.on('-?', '-h', '--help') do
   puts op
   exit
 end
+op.on('-u', '--user=USER', String, "Default user for ssh connections") do |user|
+  options[:user] = user
+end
 op.on('-l', '--long', "Report long/full command output") do
   options[:format] = :long
 end
@@ -86,7 +89,7 @@ merger = Net::SSHR::Merger.new if options[:merge]
 
 # exec cmd on all hosts, reporting results as them come in
 $stderr.puts "Running '#{cmd}' on #{args.length} hosts ...\n\n" if options[:verbose]
-sshr_exec(args, cmd, { :verbose => options[:verbose] }) do |res|
+sshr_exec(args, cmd, { :default_user => options[:user], :verbose => options[:verbose] }) do |res|
   if options[:merge]:
     merger.merge(res)
   else
@@ -119,6 +122,7 @@ and collating and presenting any output and errors from the command.
 
 == OPTIONS
 
+    -u, --user                       Default user for ssh connections
     -l, --long                       Report long/full command output
     -s, --short                      Report short command output (first line only)
     -j, --json                       Report results as json
@@ -138,8 +142,8 @@ Gavin Carr <gavin@openfusion.com.au>
 
 Copyright 2010 by Gavin Carr.
 
-This library is free software; you can redistribute it and/or modify it under the same 
-terms as ruby (see COPYING for details).
+This library is free software; you can redistribute it and/or modify it under the
+same terms as ruby (see COPYING for details).
 
 =end
 
