@@ -36,10 +36,15 @@ module Net
   #   puts result
   #
   module SSHR
-    # Run the given cmd on the given hosts, executing block with each host's results
-    # (a Net::SSHR::Result object).
+    # Run cmd on the given array of hosts. Hosts are strings - either
+    # just bare hostnames ('host1') or user@hostname combinations
+    # ('user@host1'). Options is a hash. The only current option is
+    # :default_user, which (if supplied) is used for any host that doesn't
+    # have an explicit user given. If &block is supplied, the block is
+    # executed with each host's results (a Net::SSHR::Result object);
+    # if no block is given, returns the set of results.
     def sshr_exec(hosts, cmd, options = {}, &block)             # yields: result
-      options[:default_user] ||= 'root'
+      options[:default_user] ||= ENV['USER']
       hosts = [ hosts ] unless hosts.is_a? Array
       if hosts.length > 1 and not block
         raise ArgumentError, "Required block argument missing (more than one host)"
@@ -74,10 +79,17 @@ module Net
       return result_data[result_data.keys.first] if not block
     end
 
-    # Run the given list of host/command pairs, executing block with each result
+    # Run the given list of host/command pairs ('host1', 'cmd1', 'host2',
+    # 'cmd2', etc.) Each host may be a bare hostname string ('host1'), or
+    # a user@hostname combination. The list of hosts and commands may
+    # optionally be followed by an options hash. The only current option
+    # is :default_user, which (if supplied) is used for any host that
+    # doesn't have an explicit user given. Requires a &block argument,
+    # which is executed for each host-cmd pair, and passed the cmd result
+    # (a Net::SSHR::Result object).
     def sshr_exec_list(*args, &block)             # yields: result
       options = args.last.is_a?(Hash) ? args.pop : {}
-      options[:default_user] ||= 'root'
+      options[:default_user] ||= ENV['USER']
 
       raise ArgumentError, "Not an even number of host-command arguments" unless args.length % 2 == 0
       raise ArgumentError, "Required block argument missing" unless block
