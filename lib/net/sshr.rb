@@ -51,7 +51,6 @@ module Net
       cc = options[:concurrent_connections]
       Net::SSH::Multi.start(:on_error => :warn, 
                             :default_user => options[:default_user],
-                            :allow_duplicate_servers => true, 
                             :concurrent_connections => cc) do |session|
         # Setup server connections and result objects
         hosts.each do |host|
@@ -89,7 +88,6 @@ module Net
       cc = options[:concurrent_connections]
       Net::SSH::Multi.start(:on_error => :warn, 
                             :default_user => options[:default_user],
-                            :allow_duplicate_servers => true, 
                             :concurrent_connections => cc) do |session|
         # Setup server connections and result objects
         while args.length > 0 do
@@ -151,5 +149,29 @@ module Net
       }
     end
   end
+
+
+  # Monkey-patch Net::SSH::Multi::ServerList to allow duplicate hosts
+  # (yes, I've tried patching upstream, but have never got a response)
+  module SSH; module Multi; class ServerList
+    def initialize(list=[])
+      options = list.last.is_a?(Hash) ? list.pop : {}
+      @list = list
+    end
+    def add(server)
+      @list.push(server)
+      server
+    end
+    def flatten
+      result = @list.inject([]) do |aggregator, server|
+        case server
+        when Server then aggregator.push(server)
+        when DynamicServer then aggregator.concat(server)
+        else raise ArgumentError, "server list contains non-server: #{server.class}"
+        end
+      end
+      result
+    end
+  end; end; end
 end
 
