@@ -46,9 +46,6 @@ module Net
     def sshr_exec(hosts, cmd, options = {}, &block)             # yields: result
       options[:default_user] ||= ENV['USER']
       hosts = [ hosts ] unless hosts.is_a? Array
-      if hosts.length > 1 and not block
-        raise ArgumentError, "Required block argument missing (more than one host)"
-      end
 
       # result_data is a hash keyed by hostname of Net::SSH::Result objects
       result_data = {}
@@ -59,9 +56,8 @@ module Net
                             :concurrent_connections => cc) do |session|
         # Setup server connections and result objects
         hosts.each do |host|
-          hostname = host.sub(/^.*@/, '')
           server = session.use(host)
-          result_data[server.object_id] = Net::SSHR::Result.new(hostname, cmd)
+          result_data[server.object_id] = Net::SSHR::Result.new(host, cmd)
         end
 
         # Execute cmd on all servers
@@ -76,7 +72,11 @@ module Net
         session.loop
       end
 
-      return result_data[result_data.keys.first] if not block
+      if not block
+        results = {}
+        result_data.each {|k,v| results[v.host_string] = v }
+        return hosts.map {|host| results[host] }
+      end
     end
 
     # Run the given list of host/command pairs ('host1', 'cmd1', 'host2',
@@ -105,12 +105,11 @@ module Net
         while args.length > 0 do
           host = args.shift
           cmd = args.shift
-          hostname = host.sub(/^.*@/, '')
           server = session.use(host)
 
           # Setup result objects to capture results, one per cmd per server
           result_data[server.object_id] ||= []
-          result_data[server.object_id].push Net::SSHR::Result.new(hostname, cmd)
+          result_data[server.object_id].push Net::SSHR::Result.new(host, cmd)
           $stderr.puts "+ [#{server.object_id}] #{session_host} => #{cmd}" if options[:verbose]
         end
 
