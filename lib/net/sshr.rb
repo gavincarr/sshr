@@ -38,11 +38,15 @@ module Net
   module SSHR
     # Run cmd on the given array of hosts. Hosts are strings - either
     # just bare hostnames ('host1') or user@hostname combinations
-    # ('user@host1'). Options is a hash. The only current option is
-    # :default_user, which (if supplied) is used for any host that doesn't
-    # have an explicit user given. If &block is supplied, the block is
-    # executed with each host's results (a Net::SSHR::Result object);
-    # if no block is given, returns the set of results.
+    # ('user@host1').
+    # Options is a hash, which can have the following keys:
+    # - :default_user, which (if supplied) is used for any host that doesn't
+    #   have an explicit user given;
+    # - :concurrent_connections, which if given will limit the number of
+    #   simultaneous connections used.
+    # If &block is supplied, the block is executed with each host's results
+    # (a Net::SSHR::Result object); if no block is given, returns the set of
+    # results.
     def sshr_exec(hosts, cmd, options = {}, &block)             # yields: result
       options[:default_user] ||= ENV['USER']
       hosts = [ hosts ] unless hosts.is_a? Array
@@ -82,7 +86,12 @@ module Net
     # Run the given list of host/command pairs ('host1', 'cmd1', 'host2',
     # 'cmd2', etc.) Each host may be a bare hostname string ('host1'), or
     # a user@hostname combination. The list of hosts and commands may
-    # optionally be followed by an options hash. The only current option
+    # optionally be followed by an options hash, which can have the
+    # following keys:
+    # - :default_user, which (if supplied) is used for any host that doesn't
+    #   have an explicit user given;
+    # - :concurrent_connections, which if given will limit the number of
+    #   simultaneous connections used.
     # is :default_user, which (if supplied) is used for any host that
     # doesn't have an explicit user given. Requires a &block argument,
     # which is executed for each host-cmd pair, and passed the cmd result
