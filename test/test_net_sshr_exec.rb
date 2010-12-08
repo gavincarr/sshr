@@ -18,8 +18,15 @@ class TestNetSSHR < Test::Unit::TestCase
       assert_equal 0, result.exit_code
     end
   end
-  def test_nonblock_exec_single
-    result_list = sshr_exec('root@localhost', 'whoami')
+  def test_nonblock_exec_single_scalar
+    result = sshr_exec('root@localhost', 'whoami')
+    assert_not_nil result
+    assert_kind_of Net::SSHR::Result, result
+    assert_equal 0, result.exit_code
+    assert_equal 'root', result.stdout.chomp!
+  end
+  def test_nonblock_exec_single_array
+    result_list = sshr_exec(%w{root@localhost}, 'whoami')
     assert_not_nil result_list
     assert_kind_of Array, result_list
     assert_kind_of Net::SSHR::Result, result_list[0]

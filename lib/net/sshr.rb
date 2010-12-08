@@ -36,9 +36,9 @@ module Net
   #   puts result
   #
   module SSHR
-    # Run cmd on the given array of hosts. Hosts are strings - either
-    # just bare hostnames ('host1') or user@hostname combinations
-    # ('user@host1').
+    # Run cmd on the given array of hosts. Hosts is either a single string,
+    # or an array of strings, each of which is either a bare hostname 
+    # ('host1') or a user@hostname combination ('user@host1').
     # Options is a hash, which can have the following keys:
     # - :default_user, which if supplied is used for any host that doesn't
     #   have an explicit user given;
@@ -47,11 +47,12 @@ module Net
     # - :request_pty, to request a pseudo-tty allocation on the ssh channel
     #   (cf. ssh -t)
     # If &block is supplied, the block is executed with each host's results
-    # (a Net::SSHR::Result object); if no block is given, returns the set of
-    # results.
+    # (a Net::SSHR::Result object); if no block is given, returns the single
+    # result if hosts was a scalar, and an array of results otherwise.
     def sshr_exec(hosts, cmd, options = {}, &block)             # yields: result
       options[:default_user] ||= ENV['USER']
-      hosts = [ hosts ] unless hosts.is_a? Array
+      hosts_scalar = true if not hosts.is_a? Array
+      hosts = [ hosts ] if hosts_scalar
 
       # result_data is a hash keyed by hostname of Net::SSH::Result objects
       result_data = {}
@@ -80,9 +81,13 @@ module Net
       end
 
       if not block
-        results = {}
-        result_data.each {|k,v| results[v.host_string] = v }
-        return hosts.map {|host| results[host] }
+        if hosts_scalar
+          return result_data[result_data.keys.first]
+        else
+          results = {}
+          result_data.each {|k,v| results[v.host_string] = v }
+          return hosts.map {|host| results[host] }
+        end
       end
     end
 
