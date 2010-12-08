@@ -5,7 +5,7 @@
 
 Summary: Flexible ssh wrapper to execute commands on remote hosts
 Name: sshr
-Version: 0.8
+Version: 0.8.1
 Release: 1%{?org_tag}%{?dist}
 Group: System/Application
 License: GPLv2+ or Ruby
@@ -66,6 +66,9 @@ rm -rf %{buildroot}
 %{gemdir}/specifications/%{gemname}-%{version}.gemspec
 
 %changelog
+* Wed Dec 08 2010 Gavin Carr <gavin@openfusion.com.au> - 0.8.1-1
+- Tweak Net::SSHR to use :default_user => ENV['SSHR_USER'] || ENV['USER'].
+
 * Wed Dec 08 2010 Gavin Carr <gavin@openfusion.com.au> - 0.8-1
 - Add a --user/-u option to sshr.
 - Update sshr_exec to return a result list if no block given.
