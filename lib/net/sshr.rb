@@ -50,7 +50,7 @@ module Net
     # (a Net::SSHR::Result object); if no block is given, returns the single
     # result if hosts was a scalar, and an array of results otherwise.
     def sshr_exec(hosts, cmd, options = {}, &block)             # yields: result
-      options[:default_user] ||= ENV['USER']
+      options[:default_user] ||= ENV['SSHR_USER'] || ENV['USER']
       hosts_scalar = true if not hosts.is_a? Array
       hosts = [ hosts ] if hosts_scalar
 
@@ -107,7 +107,7 @@ module Net
     # object).
     def sshr_exec_list(*args, &block)             # yields: result
       options = args.last.is_a?(Hash) ? args.pop : {}
-      options[:default_user] ||= ENV['USER']
+      options[:default_user] ||= ENV['SSHR_USER'] || ENV['USER']
 
       raise ArgumentError, "Not an even number of host-command arguments" unless args.length % 2 == 0
       raise ArgumentError, "Required block argument missing" unless block
