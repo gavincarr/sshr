@@ -5,7 +5,7 @@
 
 Summary: Flexible ssh wrapper to execute commands on remote hosts
 Name: sshr
-Version: 0.7
+Version: 0.8
 Release: 1%{?org_tag}%{?dist}
 Group: System/Application
 License: GPLv2+ or Ruby
@@ -66,6 +66,12 @@ rm -rf %{buildroot}
 %{gemdir}/specifications/%{gemname}-%{version}.gemspec
 
 %changelog
+* Wed Dec 08 2010 Gavin Carr <gavin@openfusion.com.au> - 0.8-1
+- Add a --user/-u option to sshr.
+- Update sshr_exec to return a result list if no block given.
+- Add a request_pty option to Net::SSHR and a corresponding -t to sshr
+- Documentation and unit test updates.
+
 * Thu Nov 25 2010 Gavin Carr <gavin@openfusion.com.au> - 0.7-1
 - Split out into separate rubygem-net-sshr and sshr packages.
 
