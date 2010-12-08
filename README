@@ -1,0 +1,82 @@
+
+Introduction
+------------
+
+sshr is an asynchronous ssh utility for executing a command on multiple
+hosts and flexibly collating and presenting the results.
+
+Net::SSHR is a rubygem that that does all the actual work. It's basically a
+thin wrapper around Net::SSH::Multi optimised for this particular use case.
+
+
+sshr
+----
+
+Synopsis:
+
+    sshr [options] <host1> [<host2> ...] <cmd>
+
+Options:
+
+    -u, --user                       Default user for ssh connections
+    -l, --long                       Report long/full command output
+    -s, --short                      Report short command output (first line only)
+    -j, --json                       Report results as json
+    -m, --merge                      Merge output before reporting
+    -o, --out, --stdout              Show only stdout, not stderr
+    -e, --err, --stderr              Show only stderr, not stdout
+    -b, --oeb, --oe                  Show both stdout and stderr (default with --long)
+    -x, --oex                        Show either stdout or stderr, but not both (xor) (default with --short)
+        --stream                     Annotate stdout and stderr streams to distinguish them
+    -t, --pty                        Request pseudo-tty allocation on ssh channels
+    -v, --verbose                    More verbose output (for debugging)
+
+
+Net::SSHR
+---------
+
+Synopsis:
+
+    require 'net/sshr'
+    include SSHR
+
+    # sshr_exec: run a command on multiple hosts
+    sshr_exec(%w{ host1 host2 }, 'uptime') do |result|
+      puts "#{result.host}: #{result.exit_code}"
+      puts #{result.stdout}
+    end
+   
+    # sshr_exec_list: run arbitrary sets of host-command pairs
+    sshr_exec_list(
+                    'host1', 'uptime',
+                    'host1', 'rpm -q ruby',
+                    'host2', 'date',
+                    'host3', 'uname -r'
+                  ) do |result|
+      puts "#{result.host}: #{result.exit_code}"
+      puts #{result.stdout}
+    end
+   
+    # Trivial single-host usage
+    result = sshr_exec('host', 'date')
+    puts result
+
+
+See Also
+--------
+
+Net::SSHR, Net::SSHR::Result, Net::SSH::Multi
+
+
+Author
+------
+
+Copyright 2010 Gavin Carr <gavin@openfusion.net>
+
+
+Licence
+-------
+
+sshr and Net::SSHR are free software; you can redistribute and/or modify them 
+under the same terms as ruby (see COPYING for details).
+
