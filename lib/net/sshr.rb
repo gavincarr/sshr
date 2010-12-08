@@ -40,10 +40,12 @@ module Net
     # just bare hostnames ('host1') or user@hostname combinations
     # ('user@host1').
     # Options is a hash, which can have the following keys:
-    # - :default_user, which (if supplied) is used for any host that doesn't
+    # - :default_user, which if supplied is used for any host that doesn't
     #   have an explicit user given;
     # - :concurrent_connections, which if given will limit the number of
     #   simultaneous connections used.
+    # - :request_pty, to request a pseudo-tty allocation on the ssh channel
+    #   (cf. ssh -t)
     # If &block is supplied, the block is executed with each host's results
     # (a Net::SSHR::Result object); if no block is given, returns the set of
     # results.
@@ -66,6 +68,7 @@ module Net
 
         # Execute cmd on all servers
         session.open_channel do |channel|
+          channel.request_pty if options[:request_pty]
           server = channel[:server]
           result = result_data[server.object_id]
           exec_block = gen_channel_exec_block(result, options, &block)
@@ -88,14 +91,15 @@ module Net
     # a user@hostname combination. The list of hosts and commands may
     # optionally be followed by an options hash, which can have the
     # following keys:
-    # - :default_user, which (if supplied) is used for any host that doesn't
+    # - :default_user, which if supplied is used for any host that doesn't
     #   have an explicit user given;
     # - :concurrent_connections, which if given will limit the number of
     #   simultaneous connections used.
-    # is :default_user, which (if supplied) is used for any host that
-    # doesn't have an explicit user given. Requires a &block argument,
-    # which is executed for each host-cmd pair, and passed the cmd result
-    # (a Net::SSHR::Result object).
+    # - :request_pty, to request a pseudo-tty allocation on the ssh channel
+    #   (cf. ssh -t)
+    # sshr_exec_list requires a &block argument, which is executed for each
+    # input host-cmd pair, and passed the cmd result (a Net::SSHR::Result
+    # object).
     def sshr_exec_list(*args, &block)             # yields: result
       options = args.last.is_a?(Hash) ? args.pop : {}
       options[:default_user] ||= ENV['USER']
@@ -123,6 +127,7 @@ module Net
         end
 
         session.open_channel do |channel|
+          channel.request_pty if options[:request_pty]
           server = channel[:server]
           result_data[server.object_id].each do |result|
             cmd = result.cmd

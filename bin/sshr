@@ -55,6 +55,9 @@ end
 #op.on('-f', '--fmt', '--format=FORMATTER', String, "Formatter to use for reporting") do |val|
 #  options[:format] = val
 #end
+op.on('-t', '--pty', "Request pseudo-tty allocation on ssh channels") do
+  options[:request_pty] = true
+end
 op.on('-v', '--verbose', "More verbose output (for debugging)") do
   options[:verbose] = true
   $stderr.sync = true
@@ -89,7 +92,11 @@ merger = Net::SSHR::Merger.new if options[:merge]
 
 # exec cmd on all hosts, reporting results as them come in
 $stderr.puts "Running '#{cmd}' on #{args.length} hosts ...\n\n" if options[:verbose]
-sshr_exec(args, cmd, { :default_user => options[:user], :verbose => options[:verbose] }) do |res|
+sshr_exec_options = { \
+  :default_user => options[:user], \
+  :request_pty => options[:request_pty], \
+  :verbose => options[:verbose] }
+sshr_exec(args, cmd, sshr_exec_options) do |res|
   if options[:merge]:
     merger.merge(res)
   else
@@ -132,6 +139,7 @@ and collating and presenting any output and errors from the command.
     -b, --oeb, --oe                  Show both stdout and stderr (default with --long)
     -x, --oex                        Show either stdout or stderr, but not both (xor) (default with --short)
         --stream                     Annotate stdout and stderr streams to distinguish them
+    -t, --pty                        Request pseudo-tty allocation on ssh channels
     -v, --verbose                    More verbose output (for debugging)
 
 = AUTHOR
