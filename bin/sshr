@@ -13,7 +13,7 @@ include Net::SSHR
 
 $stdout.sync = true
 
-options = { :oe_selector => [] }
+options = { :oe_selector => [], :show_hostname => nil }
 
 # Parse options
 op = OptionParser.new
@@ -48,6 +48,12 @@ op.on('-b', '--oeb', '--oe', "Show both stdout and stderr (default with --long)"
 end
 op.on('-x', '--oex', "Show either stdout or stderr, but not both (xor) (default with --short)") do
   options[:oe_selector].push(:oe_xor)
+end
+op.on('-H', '--show-hostname', "Show hostname with output (e.g. with --short)") do
+  options[:show_hostname] = true
+end
+op.on('--no-hostname', '--nh', "Omit hostname from output (e.g. with --long)") do
+  options[:show_hostname] = false
 end
 op.on('--stream', "Annotate stdout and stderr streams to distinguish them") do
   options[:annotate_flag] = true
@@ -89,6 +95,7 @@ trap("INT") { puts; exit }
 
 fmt    = Net::SSHR::Formatter.new({ :format             => options[:format], \
                                     :out_err_selector   => options[:oe_selector], \
+                                    :show_hostname      => options[:show_hostname], \
                                     :annotate_flag      => options[:annotate_flag] \
                                   })
 merger = Net::SSHR::Merger.new if options[:merge]
