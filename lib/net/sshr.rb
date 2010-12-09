@@ -50,7 +50,6 @@ module Net
     # (a Net::SSHR::Result object); if no block is given, returns the single
     # result if hosts was a scalar, and an array of results otherwise.
     def sshr_exec(hosts, cmd, options = {}, &block)             # yields: result
-      options[:default_user] ||= ENV['SSHR_USER'] || ENV['USER']
       hosts_scalar = true if not hosts.is_a? Array
       hosts = [ hosts ] if hosts_scalar
 
@@ -107,7 +106,6 @@ module Net
     # object).
     def sshr_exec_list(*args, &block)             # yields: result
       options = args.last.is_a?(Hash) ? args.pop : {}
-      options[:default_user] ||= ENV['SSHR_USER'] || ENV['USER']
 
       raise ArgumentError, "Not an even number of host-command arguments" unless args.length % 2 == 0
       raise ArgumentError, "Required block argument missing" unless block
@@ -182,7 +180,7 @@ module Net
 
 
   # Monkey-patch Net::SSH::Multi::ServerList to allow duplicate hosts
-  # (yes, I've tried patching upstream, but have never got a response)
+  # (tried patching upstream, but have never got a response)
   module SSH; module Multi; class ServerList
     def initialize(list=[])
       options = list.last.is_a?(Hash) ? list.pop : {}
@@ -203,5 +201,17 @@ module Net
       result
     end
   end; end; end
+
+  # Monkey-patch Net::SSH::Config#for to default options user if unset
+  module SSH; class Config
+    class <<self
+      alias_method :old_for, :for
+      def for(host, files=default_files)
+        options = old_for(host, files)
+        options[:user] ||= ENV['USER'] || ENV['USERNAME'] || 'unknown'
+        options
+      end
+    end
+  end; end
 end
 
