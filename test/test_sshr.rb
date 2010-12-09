@@ -19,10 +19,10 @@ class TestSSHR < Test::Unit::TestCase
     cmd = "#{@sshr} --long localhost #{@dir}/helper_test_cmd.rb"
     IO.popen(cmd) { |io| assert_equal outerr, io.gets(nil) }
 
-    cmd = "#{@sshr} -l -b localhost #{@dir}/helper_test_cmd.rb"
+    cmd = "#{@sshr} -l -b localhost '#{@dir}/helper_test_cmd.rb one two three'"
     IO.popen(cmd) { |io| assert_equal outerr, io.gets(nil) }
 
-    cmd = "#{@sshr} --long -o localhost #{@dir}/helper_test_cmd.rb"
+    cmd = "#{@sshr} --long -o localhost -- #{@dir}/helper_test_cmd.rb one two three"
     IO.popen(cmd) { |io| assert_equal out, io.gets(nil) }
 
     cmd = "#{@sshr} -l -e localhost #{@dir}/helper_test_cmd.rb"
@@ -65,10 +65,10 @@ class TestSSHR < Test::Unit::TestCase
     cmd = "#{@sshr} --short localhost #{@dir}/helper_test_cmd.rb"
     IO.popen(cmd) { |io| assert_equal out, io.gets(nil) }
 
-    cmd = "#{@sshr} --no-hostname -s -b localhost #{@dir}/helper_test_cmd.rb"
+    cmd = "#{@sshr} --no-hostname -s -b localhost '#{@dir}/helper_test_cmd.rb one two three'"
     IO.popen(cmd) { |io| assert_equal outerr, io.gets(nil) }
 
-    cmd = "#{@sshr} --short -o localhost #{@dir}/helper_test_cmd.rb"
+    cmd = "#{@sshr} --short -o localhost -- #{@dir}/helper_test_cmd.rb one two three"
     IO.popen(cmd) { |io| assert_equal out, io.gets(nil) }
 
     cmd = "#{@sshr} -s -e localhost #{@dir}/helper_test_cmd.rb"
