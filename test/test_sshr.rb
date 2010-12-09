@@ -9,9 +9,12 @@ class TestSSHR < Test::Unit::TestCase
   end
 
   def test_long
-    outerr = "[localhost]\nOutput the first\nOutput the second\nOutput the third\n\nError the first\nError the second\nError the third\n\n"
-    out = "[localhost]\nOutput the first\nOutput the second\nOutput the third\n\n"
-    err = "[localhost]\nError the first\nError the second\nError the third\n\n"
+    outerr      = "[localhost]\nOutput the first\nOutput the second\nOutput the third\n\nError the first\nError the second\nError the third\n\n"
+    out         = "[localhost]\nOutput the first\nOutput the second\nOutput the third\n\n"
+    err         = "[localhost]\nError the first\nError the second\nError the third\n\n"
+    outerr_nh   = "Output the first\nOutput the second\nOutput the third\n\nError the first\nError the second\nError the third\n\n"
+    out_nh      = "Output the first\nOutput the second\nOutput the third\n\n"
+    err_nh      = "Error the first\nError the second\nError the third\n\n"
 
     cmd = "#{@sshr} --long localhost #{@dir}/helper_test_cmd.rb"
     IO.popen(cmd) { |io| assert_equal outerr, io.gets(nil) }
@@ -27,19 +30,42 @@ class TestSSHR < Test::Unit::TestCase
 
     cmd = "#{@sshr} --long -x localhost #{@dir}/helper_test_cmd.rb"
     IO.popen(cmd) { |io| assert_equal out, io.gets(nil) }
+
+
+    # --no-hostname versions
+    cmd = "#{@sshr} --nh --long localhost #{@dir}/helper_test_cmd.rb"
+    IO.popen(cmd) { |io| assert_equal outerr_nh, io.gets(nil) }
+
+    cmd = "#{@sshr} -l -b --no-hostname localhost #{@dir}/helper_test_cmd.rb"
+    IO.popen(cmd) { |io| assert_equal outerr_nh, io.gets(nil) }
+
+    cmd = "#{@sshr} --long -o --nh localhost #{@dir}/helper_test_cmd.rb"
+    IO.popen(cmd) { |io| assert_equal out_nh, io.gets(nil) }
+
+    cmd = "#{@sshr} -l --no-hostname -e localhost #{@dir}/helper_test_cmd.rb"
+    IO.popen(cmd) { |io| assert_equal err_nh, io.gets(nil) }
+
+    cmd = "#{@sshr} --long --no-hostname -x localhost #{@dir}/helper_test_cmd.rb"
+    IO.popen(cmd) { |io| assert_equal out_nh, io.gets(nil) }
   end
 
   def test_short
-    outerr = "localhost:           Output the first\nlocalhost:           Error the first\n"
-    out = "localhost:           Output the first\n"
-    err = "localhost:           Error the first\n"
-    user = "localhost:           #{ENV['USER']}\n"
-    root = "localhost:           root\n"
+    outerr      = "Output the first\nError the first\n"
+    out         = "Output the first\n"
+    err         = "Error the first\n"
+    user        = "#{ENV['USER']}\n"
+    root        = "root\n"
+    outerr_h    = "localhost:           Output the first\nlocalhost:           Error the first\n"
+    out_h       = "localhost:           #{out}"
+    err_h       = "localhost:           #{err}"
+    user_h      = "localhost:           #{user}"
+    root_h      = "localhost:           #{root}"
 
+    # default (--no-hostname) versions
     cmd = "#{@sshr} --short localhost #{@dir}/helper_test_cmd.rb"
     IO.popen(cmd) { |io| assert_equal out, io.gets(nil) }
 
-    cmd = "#{@sshr} -s -b localhost #{@dir}/helper_test_cmd.rb"
+    cmd = "#{@sshr} --no-hostname -s -b localhost #{@dir}/helper_test_cmd.rb"
     IO.popen(cmd) { |io| assert_equal outerr, io.gets(nil) }
 
     cmd = "#{@sshr} --short -o localhost #{@dir}/helper_test_cmd.rb"
@@ -48,7 +74,7 @@ class TestSSHR < Test::Unit::TestCase
     cmd = "#{@sshr} -s -e localhost #{@dir}/helper_test_cmd.rb"
     IO.popen(cmd) { |io| assert_equal err, io.gets(nil) }
 
-    cmd = "#{@sshr} --short -x localhost #{@dir}/helper_test_cmd.rb"
+    cmd = "#{@sshr} --no-hostname --short -x localhost #{@dir}/helper_test_cmd.rb"
     IO.popen(cmd) { |io| assert_equal out, io.gets(nil) }
 
     # TODO: figure out how to mock this instead of requiring root ssh and whoami
@@ -57,6 +83,30 @@ class TestSSHR < Test::Unit::TestCase
 
     cmd = "#{@sshr} --user root localhost whoami"
     IO.popen(cmd) { |io| assert_equal root, io.gets(nil) }
+
+
+    # --show-hostname versions
+    cmd = "#{@sshr} --short -H localhost #{@dir}/helper_test_cmd.rb"
+    IO.popen(cmd) { |io| assert_equal out_h, io.gets(nil) }
+
+    cmd = "#{@sshr} -s --show-hostname -b localhost #{@dir}/helper_test_cmd.rb"
+    IO.popen(cmd) { |io| assert_equal outerr_h, io.gets(nil) }
+
+    cmd = "#{@sshr} --short --show-hostname -o localhost #{@dir}/helper_test_cmd.rb"
+    IO.popen(cmd) { |io| assert_equal out_h, io.gets(nil) }
+
+    cmd = "#{@sshr} -sH -e localhost #{@dir}/helper_test_cmd.rb"
+    IO.popen(cmd) { |io| assert_equal err_h, io.gets(nil) }
+
+    cmd = "#{@sshr} --short -xH localhost #{@dir}/helper_test_cmd.rb"
+    IO.popen(cmd) { |io| assert_equal out_h, io.gets(nil) }
+
+    # TODO: figure out how to mock this instead of requiring root ssh and whoami
+    cmd = "#{@sshr} --show-hostname localhost whoami"
+    IO.popen(cmd) { |io| assert_equal user_h, io.gets(nil) }
+
+    cmd = "#{@sshr} --show-hostname --user root localhost whoami"
+    IO.popen(cmd) { |io| assert_equal root_h, io.gets(nil) }
   end
 
   def test_json
