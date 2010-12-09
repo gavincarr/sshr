@@ -5,22 +5,36 @@ module Net
     # Net::SSHR::Formatter class, handling formatting of Net::SSHR::Result objects
     class Formatter
 
-      # Create a new formatter instance. 
-      # @format may be one of :long (full multi-line output), :short (show only the
-      # first line of output), or :json (format result as a serialised json hash).
-      # @out_err_selector may be one of the following:
+      # Format, one of: 
+      # - :long (full multi-line output)
+      # - :short (show only the first line of output)
+      # - :json (format result as a serialised json hash)
+      attr_accessor :format
+
+      # Output/Error Selector, one of the following:
       # - :oe_out  - to display only the stdout stream
       # - :oe_err  - to display only the stderr stream
       # - :oe_both - to display both the stdout and stderr streams
       # - :oe_xor  - to display the stdout stream if set, otherwise stderr
-      # The @annotate_flag is used to indicate whether to explicitly annotate the streams.
-      # The @hostwidth parameter indicates the length to use for the hostname field
-      # when @format == :short.
-      def initialize(format = nil, out_err_selector = nil, annotate_flag = false, hostwidth = 20)
-        @format = format
-        @out_err_selector = out_err_selector
-        @annotate_flag = annotate_flag
-        @hostwidth = hostwidth
+      # Default is +xor+ for :short format, and +both+ otherwise
+      attr_accessor :out_err_selector
+
+      # Whether to show the hostname in the output (boolean)
+      # Default is +false+ for :short format, and +true+ otherwise
+      attr_accessor :show_hostname
+
+      # Whether to explicitly annotate the output and error streams
+      attr_accessor :annotate_flag
+
+      # Create a new formatter instance.
+      def initialize(options = {})
+        @format = nil
+        @out_err_selector = nil
+        @show_hostname = nil
+        @annotate_flag = false
+        @hostname_width = 20
+
+        options.each{|opt, val| send("#{opt}=", val) }
       end
 
       # Returns a formatted output string for the given result
@@ -32,21 +46,24 @@ module Net
         # Default formatter: use short for single lines, otherwise long
         @format ||= result.stdout =~ /\n/ ? :long : :short
 
-        # Default out_err_selector: stdout xor stderr in 'short' mode, otherwise both
+        # Default out_err_selector if not set: stdout xor stderr in 'short' mode, otherwise both
+        # Default show_header if not set: false in 'short' mode, otherwise true
         @out_err_selector ||= (@format == :short ? :oe_xor : :oe_both)
+        @show_hostname = (@format == :short ? false : true) if @show_hostnmae == nil
 
         method(@format).call(result)
       end
 
       # Returns a formatted output string for the given set of results
       def render_all(result_set)
-        # If we're doing the whole set and :format is :short, adapt hostwidth
-        @hostwidth = 1
+        # If we're doing the whole set and :format is :short, calculate hostname_width
+        @hostname_width = 1
         result_set.each do |result|
-          result_hostwidth = result.host.length + 2
-          if @hostwidth < result_hostwidth
-             @hostwidth = result_hostwidth
+          result_hostname_width = result.host.length + 2
+          if @hostname_width < result_hostname_width
+             @hostname_width = result_hostname_width
           end
+          break unless @show_hostname
         end
 
         # Render each result
@@ -76,7 +93,7 @@ module Net
         display_stderr = display_stderr(result.stderr, result.stdout)
 
         out = ''
-        out << "[#{result.host}]\n"
+        out << "[#{result.host}]\n" if @show_hostname
         out << result.stdout + "\n" if display_stdout
         if display_stdout and display_stderr:
           out << "\n" 
@@ -90,14 +107,21 @@ module Net
       # Short output renderer
       def short(result)
         out = ''
-        fmt = "%-#{@hostwidth}s %s%s\n"
+        hostname = ''
+        fmt = "%s%s\n"
+        if @show_hostname
+          fmt = "%-#{@hostwidth}s " + fmt
+          hostname = result.host + ':'
+        else
+          fmt = '%s' + fmt
+        end
         if display_stdout(result.stdout):
           stdout = result.stdout.sub(/\n.*/m, '')
-          out << sprintf(fmt, result.host + ':', @annotate_flag ? '[O] ' : '', stdout)
+          out << sprintf(fmt, hostname, @annotate_flag ? '[O] ' : '', stdout)
         end
         if display_stderr(result.stderr, result.stdout):
           stderr = result.stderr.sub(/\n.*/m, '')
-          out << sprintf(fmt, result.host + ':', @annotate_flag ? '[E] ' : '', stderr)
+          out << sprintf(fmt, hostname, @annotate_flag ? '[E] ' : '', stderr)
         end
         return out
       end
