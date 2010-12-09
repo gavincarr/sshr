@@ -14,11 +14,12 @@ sshr
 
 Synopsis:
 
-    sshr [options] <host1> [<host2> ...] <cmd>
+    sshr [options] <host1> [<host2> ...] <cmd_args_string>
+    sshr [options] <host1> [<host2> ...] -- <cmd> [<arg1> <arg2> ...]
 
 Options:
 
-    -u, --user                       Default user for ssh connections
+    -u, --user=USER                  Default user for ssh connections
     -l, --long                       Report long/full command output
     -s, --short                      Report short command output (first line only)
     -j, --json                       Report results as json
@@ -27,6 +28,8 @@ Options:
     -e, --err, --stderr              Show only stderr, not stdout
     -b, --oeb, --oe                  Show both stdout and stderr (default with --long)
     -x, --oex                        Show either stdout or stderr, but not both (xor) (default with --short)
+    -H, --show-hostname              Show hostname with output (e.g. with --short)
+        --no-hostname, --nh          Omit hostname from output (e.g. with --long)
         --stream                     Annotate stdout and stderr streams to distinguish them
     -t, --pty                        Request pseudo-tty allocation on ssh channels
     -v, --verbose                    More verbose output (for debugging)
