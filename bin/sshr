@@ -87,7 +87,10 @@ cmd = args.pop
 
 trap("INT") { puts; exit }
 
-fmt    = Net::SSHR::Formatter.new(options[:format], options[:oe_selector], options[:annotate_flag])
+fmt    = Net::SSHR::Formatter.new({ :format             => options[:format], \
+                                    :out_err_selector   => options[:oe_selector], \
+                                    :annotate_flag      => options[:annotate_flag] \
+                                  })
 merger = Net::SSHR::Merger.new if options[:merge]
 
 # exec cmd on all hosts, reporting results as them come in
