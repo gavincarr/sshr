@@ -17,7 +17,8 @@ options = { :oe_selector => [], :show_hostname => nil }
 
 # Parse options
 op = OptionParser.new
-op.banner = "Usage: sshr [options] <host1> [<host2> ...] <cmd>"
+op.banner = "Usage: sshr [options] <host1> [<host2> ...] <cmd_args_string>\n" +
+            "       sshr [options] <host1> [<host2> ...] -- <cmd> [<arg1> <arg2> ...]"
 op.on('-?', '-h', '--help') do
   puts op
   exit
@@ -70,7 +71,7 @@ op.on('-v', '--verbose', "More verbose output (for debugging)") do
 end
 
 begin
-  args = op.parse(ARGV)
+  args = op.order(ARGV)
 rescue => e
   $stderr.puts "Error: " << e
   $stderr.puts op
@@ -89,7 +90,18 @@ else
    options[:oe_selector] =  options[:oe_selector][0]
 end
 
-cmd = args.pop
+# Check for -- hosts-cmd separator
+hosts = nil
+cmd = nil
+0.upto(args.length-1) do |i|
+  if args[i] == '--'
+    hosts = args[0, i]
+    cmd = args[i+1, args.length-(i+1)].join(' ')
+    break
+  end
+end
+cmd ||= args.pop
+hosts ||= args
 
 trap("INT") { puts; exit }
 
@@ -101,12 +113,12 @@ fmt    = Net::SSHR::Formatter.new({ :format             => options[:format], \
 merger = Net::SSHR::Merger.new if options[:merge]
 
 # exec cmd on all hosts, reporting results as them come in
-$stderr.puts "Running '#{cmd}' on #{args.length} hosts ...\n\n" if options[:verbose]
+$stderr.puts "Running '#{cmd}' on #{hosts.length} hosts ...\n\n" if options[:verbose]
 sshr_exec_options = { \
   :default_user => options[:user], \
   :request_pty => options[:request_pty], \
   :verbose => options[:verbose] }
-sshr_exec(args, cmd, sshr_exec_options) do |res|
+sshr_exec(hosts, cmd, sshr_exec_options) do |res|
   if options[:merge]:
     merger.merge(res)
   else
@@ -126,20 +138,21 @@ end
 = NAME
 
 sshr - an asynchronous ssh wrapper for executing a command on multiple hosts
-and collating and presenting command output
+and collating and presenting the output
 
 = SYNOPSIS
 
-  sshr [options] <host1> [<host2> ...] <cmd>
+  sshr [options] <host1> [<host2> ...] <cmd_args_string>
+  sshr [options] <host1> [<host2> ...] -- <cmd> [<arg1> <arg2> ...]
 
 = DESCRIPTION
 
 sshr is an asynchronous ssh wrapper for executing a command on multiple hosts
-and collating and presenting any output and errors from the command.
+and collating and presenting any output and/or errors.
 
 == OPTIONS
 
-    -u, --user                       Default user for ssh connections
+    -u, --user=USER                  Default user for ssh connections
     -l, --long                       Report long/full command output
     -s, --short                      Report short command output (first line only)
     -j, --json                       Report results as json
@@ -148,6 +161,8 @@ and collating and presenting any output and errors from the command.
     -e, --err, --stderr              Show only stderr, not stdout
     -b, --oeb, --oe                  Show both stdout and stderr (default with --long)
     -x, --oex                        Show either stdout or stderr, but not both (xor) (default with --short)
+    -H, --show-hostname              Show hostname with output (e.g. with --short)
+        --no-hostname, --nh          Omit hostname from output (e.g. with --long)
         --stream                     Annotate stdout and stderr streams to distinguish them
     -t, --pty                        Request pseudo-tty allocation on ssh channels
     -v, --verbose                    More verbose output (for debugging)
