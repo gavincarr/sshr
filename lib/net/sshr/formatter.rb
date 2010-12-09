@@ -26,6 +26,9 @@ module Net
       # Whether to explicitly annotate the output and error streams
       attr_accessor :annotate_flag
 
+      # Width (characters) to use for hostname field (if :show_hostname is true)
+      attr_accessor :hostname_width
+
       # Create a new formatter instance.
       def initialize(options = {})
         @format = nil
@@ -49,7 +52,7 @@ module Net
         # Default out_err_selector if not set: stdout xor stderr in 'short' mode, otherwise both
         # Default show_header if not set: false in 'short' mode, otherwise true
         @out_err_selector ||= (@format == :short ? :oe_xor : :oe_both)
-        @show_hostname = (@format == :short ? false : true) if @show_hostnmae == nil
+        @show_hostname = (@format == :short ? false : true) if @show_hostname == nil
 
         method(@format).call(result)
       end
@@ -110,7 +113,7 @@ module Net
         hostname = ''
         fmt = "%s%s\n"
         if @show_hostname
-          fmt = "%-#{@hostwidth}s " + fmt
+          fmt = "%-#{@hostname_width}s " + fmt
           hostname = result.host + ':'
         else
           fmt = '%s' + fmt
