@@ -105,10 +105,11 @@ hosts ||= args
 
 trap("INT") { puts; exit }
 
-fmt    = Net::SSHR::Formatter.new({ :format             => options[:format], \
-                                    :out_err_selector   => options[:oe_selector], \
-                                    :show_hostname      => options[:show_hostname], \
-                                    :annotate_flag      => options[:annotate_flag] \
+fmt    = Net::SSHR::Formatter.new({ :format             => options[:format],
+                                    :out_err_selector   => options[:oe_selector],
+                                    :show_hostname      => options[:show_hostname],
+                                    :annotate_flag      => options[:annotate_flag],
+                                    :host_count         => hosts.length,
                                   })
 merger = Net::SSHR::Merger.new if options[:merge]
 

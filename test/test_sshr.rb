@@ -9,12 +9,12 @@ class TestSSHR < Test::Unit::TestCase
   end
 
   def test_long
-    outerr      = "[localhost]\nOutput the first\nOutput the second\nOutput the third\n\nError the first\nError the second\nError the third\n\n"
-    out         = "[localhost]\nOutput the first\nOutput the second\nOutput the third\n\n"
-    err         = "[localhost]\nError the first\nError the second\nError the third\n\n"
-    outerr_nh   = "Output the first\nOutput the second\nOutput the third\n\nError the first\nError the second\nError the third\n\n"
-    out_nh      = "Output the first\nOutput the second\nOutput the third\n\n"
-    err_nh      = "Error the first\nError the second\nError the third\n\n"
+    outerr      = "[localhost]\nOutput the first\nOutput the second\nOutput the third\n\nError the first\nError the second\nError the third\n"
+    out         = "[localhost]\nOutput the first\nOutput the second\nOutput the third\n"
+    err         = "[localhost]\nError the first\nError the second\nError the third\n"
+    outerr_nh   = "Output the first\nOutput the second\nOutput the third\n\nError the first\nError the second\nError the third\n"
+    out_nh      = "Output the first\nOutput the second\nOutput the third\n"
+    err_nh      = "Error the first\nError the second\nError the third\n"
 
     cmd = "#{@sshr} --long localhost #{@dir}/helper_test_cmd.rb"
     IO.popen(cmd) { |io| assert_equal outerr, io.gets(nil) }

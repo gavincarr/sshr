@@ -29,6 +29,9 @@ module Net
       # Width (characters) to use for hostname field (if :show_hostname is true)
       attr_accessor :hostname_width
 
+      # Number of hosts to be formatted (mostly useful for N == 1)
+      attr_accessor :host_count
+
       # Create a new formatter instance.
       def initialize(options = {})
         @format = nil
@@ -36,6 +39,7 @@ module Net
         @show_hostname = nil
         @annotate_flag = false
         @hostname_width = 20
+        @host_count = 0
 
         options.each{|opt, val| send("#{opt}=", val) }
       end
@@ -103,7 +107,7 @@ module Net
           out << "** STDERR **\n" if @annotate_flag
         end
         out << result.stderr + "\n" if display_stderr
-        out << "\n"
+        out << "\n" unless @host_count == 1
         return out
       end
 
