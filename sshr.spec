@@ -6,7 +6,7 @@
 Summary: Flexible ssh wrapper to execute commands on remote hosts
 Name: sshr
 Version: 0.9
-Release: 1%{?org_tag}%{?dist}
+Release: 2%{?org_tag}%{?dist}
 Group: System/Application
 License: GPLv2+ or Ruby
 URL: http://www.openfusion.net/tags/sshr
@@ -24,8 +24,9 @@ output in nice ways.
 Summary: SSH wrapper library to execute a command on multiple hosts
 Group: Development/Languages
 Requires: rubygems
-Requires: rubygem(net-ssh) >= 0
-Requires: rubygem(net-ssh-multi) >= 0
+Requires: rubygem(net-ssh)
+Requires: rubygem(net-ssh-multi)
+Requires: rubygem(highline)
 Provides: rubygem(%{gemname}) = %{version}
 
 %description -n rubygem-%{gemname}
@@ -66,6 +67,9 @@ rm -rf %{buildroot}
 %{gemdir}/specifications/%{gemname}-%{version}.gemspec
 
 %changelog
+* Fri Dec 10 2010 Gavin Carr <gavin@openfusion.com.au> - 0.9-2
+- Add dependency on rubygem(highline).
+
 * Thu Dec 09 2010 Gavin Carr <gavin@openfusion.com.au> - 0.9-1
 - Monkey-patch Net::SSH::Config to get config User setting working with sshr.
 - Change default sshr --short output to omit hostnames (like ssh).
