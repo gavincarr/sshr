@@ -20,9 +20,11 @@ Synopsis:
 Options:
 
     -u, --user=USER                  Default user for ssh connections
+    -t, --pty                        Request pseudo-tty allocation on ssh channels
     -l, --long                       Report long/full command output
     -s, --short                      Report short command output (first line only)
     -j, --json                       Report results as json
+        --list                       Report hosts that produce output (and nothing else)
     -m, --merge                      Merge output before reporting
     -o, --out, --stdout              Show only stdout, not stderr
     -e, --err, --stderr              Show only stderr, not stdout
@@ -31,7 +33,7 @@ Options:
     -H, --show-hostname              Show hostname with output (e.g. with --short)
         --no-hostname, --nh          Omit hostname from output (e.g. with --long)
         --stream                     Annotate stdout and stderr streams to distinguish them
-    -t, --pty                        Request pseudo-tty allocation on ssh channels
+    -q, --quiet                      Omit hosts that don't produce any output
     -v, --verbose                    More verbose output (for debugging)
 
 

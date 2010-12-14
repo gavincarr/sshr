@@ -6,9 +6,10 @@ module Net
     class Formatter
 
       # Format, one of: 
-      # - :long (full multi-line output)
+      # - :long  (full multi-line output)
       # - :short (show only the first line of output)
-      # - :json (format result as a serialised json hash)
+      # - :json  (format result as a serialised json hash)
+      # - :list  (report hosts that produce output, and nothing else)
       attr_accessor :format
 
       # Output/Error Selector, one of the following:
@@ -22,6 +23,10 @@ module Net
       # Whether to show the hostname in the output (boolean)
       # Default is +false+ for :short format, and +true+ otherwise
       attr_accessor :show_hostname
+
+      # Whether to show hosts that produce no output (boolean)
+      # Default is +false+ i.e. show hosts that produce no output
+      attr_accessor :quiet
 
       # Whether to explicitly annotate the output and error streams
       attr_accessor :annotate_flag
@@ -37,6 +42,7 @@ module Net
         @format = nil
         @out_err_selector = nil
         @show_hostname = nil
+        @quiet = false
         @annotate_flag = false
         @hostname_width = 20
         @host_count = 0
@@ -50,6 +56,8 @@ module Net
         result.stdout.chomp!
         result.stderr.chomp!
 
+        return '' if @quiet and result.stdout == ''
+
         # Default formatter: use short for single lines, otherwise long
         @format ||= result.stdout =~ /\n/ ? :long : :short
 
@@ -58,7 +66,7 @@ module Net
         @out_err_selector ||= (@format == :short ? :oe_xor : :oe_both)
         @show_hostname = (@format == :short ? false : true) if @show_hostname == nil
 
-        method(@format).call(result)
+        method(@format).call(result) || ''
       end
 
       # Returns a formatted output string for the given set of results
@@ -137,6 +145,11 @@ module Net
       def json(result)
         require 'json'
         return result.to_json + "\n"
+      end
+
+      # List hosts renderer
+      def list(result)
+        return "#{result.host}\n" if result.stdout != ''
       end
     end
   end

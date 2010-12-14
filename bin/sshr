@@ -26,6 +26,9 @@ end
 op.on('-u', '--user=USER', String, "Default user for ssh connections") do |user|
   options[:user] = user
 end
+op.on('-t', '--pty', "Request pseudo-tty allocation on ssh channels") do
+  options[:request_pty] = true
+end
 op.on('-l', '--long', "Report long/full command output") do
   options[:format] = :long
 end
@@ -34,6 +37,9 @@ op.on('-s', '--short', "Report short command output (first line only)") do
 end
 op.on('-j', '--json',  "Report results as json") do
   options[:format] = :json
+end
+op.on('--list', "Report hosts that produce output (and nothing else)") do
+  options[:format] = :list
 end
 op.on('-m', '--merge', "Merge output before reporting") do
   options[:merge] = true
@@ -59,11 +65,8 @@ end
 op.on('--stream', "Annotate stdout and stderr streams to distinguish them") do
   options[:annotate_flag] = true
 end
-#op.on('-f', '--fmt', '--format=FORMATTER', String, "Formatter to use for reporting") do |val|
-#  options[:format] = val
-#end
-op.on('-t', '--pty', "Request pseudo-tty allocation on ssh channels") do
-  options[:request_pty] = true
+op.on('-q', '--quiet', "Omit hosts that don't produce any output") do 
+  options[:quiet] = true
 end
 op.on('-v', '--verbose', "More verbose output (for debugging)") do
   options[:verbose] = true
@@ -108,6 +111,7 @@ trap("INT") { puts; exit }
 fmt    = Net::SSHR::Formatter.new({ :format             => options[:format],
                                     :out_err_selector   => options[:oe_selector],
                                     :show_hostname      => options[:show_hostname],
+                                    :quiet              => options[:quiet],
                                     :annotate_flag      => options[:annotate_flag],
                                     :host_count         => hosts.length,
                                   })
@@ -115,10 +119,11 @@ merger = Net::SSHR::Merger.new if options[:merge]
 
 # exec cmd on all hosts, reporting results as them come in
 $stderr.puts "Running '#{cmd}' on #{hosts.length} hosts ...\n\n" if options[:verbose]
-sshr_exec_options = { \
-  :default_user => options[:user], \
-  :request_pty => options[:request_pty], \
-  :verbose => options[:verbose] }
+sshr_exec_options = {
+  :default_user => options[:user],
+  :request_pty => options[:request_pty],
+  :verbose => options[:verbose],
+}
 sshr_exec(hosts, cmd, sshr_exec_options) do |res|
   if options[:merge]:
     merger.merge(res)
@@ -154,9 +159,11 @@ and collating and presenting any output and/or errors.
 == OPTIONS
 
     -u, --user=USER                  Default user for ssh connections
+    -t, --pty                        Request pseudo-tty allocation on ssh channels
     -l, --long                       Report long/full command output
     -s, --short                      Report short command output (first line only)
     -j, --json                       Report results as json
+        --list                       Report hosts that produce output (and nothing else)
     -m, --merge                      Merge output before reporting
     -o, --out, --stdout              Show only stdout, not stderr
     -e, --err, --stderr              Show only stderr, not stdout
@@ -165,7 +172,7 @@ and collating and presenting any output and/or errors.
     -H, --show-hostname              Show hostname with output (e.g. with --short)
         --no-hostname, --nh          Omit hostname from output (e.g. with --long)
         --stream                     Annotate stdout and stderr streams to distinguish them
-    -t, --pty                        Request pseudo-tty allocation on ssh channels
+    -q, --quiet                      Omit hosts that don't produce any output
     -v, --verbose                    More verbose output (for debugging)
 
 = AUTHOR
