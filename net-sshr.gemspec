@@ -5,7 +5,7 @@ Gem::Specification.new do |s|
   s.description     = 'Flexible ssh wrapper to execute commands on remote hosts and render the output in nice ways'
   s.add_dependency('net-ssh')
   s.add_dependency('net-ssh-multi')
-  s.version         = '0.9'
+  s.version         = '0.10'
   s.author          = 'Gavin Carr'
   s.email           = 'gavin@openfusion.net'
   s.homepage        = 'http://www.openfusion.net/tags/sshr'
