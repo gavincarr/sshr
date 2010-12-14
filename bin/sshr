@@ -19,7 +19,7 @@ options = { :format => [], :oe_selector => [], :show_hostname => nil }
 op = OptionParser.new
 op.banner = "Usage: sshr [options] <host1> [<host2> ...] <cmd_args_string>\n" +
             "       sshr [options] <host1> [<host2> ...] -- <cmd> [<arg1> <arg2> ...]"
-op.on('-?', '-h', '--help') do
+op.on('-?', '--help') do
   puts op
   exit
 end
@@ -38,7 +38,7 @@ end
 op.on('-j', '--json',  "Report results as json") do
   options[:format].push(:json)
 end
-op.on('--list', "Report hosts that produce output (and nothing else)") do
+op.on('-L', '--list', "Report hosts that produce output (and nothing else)") do
   options[:format].push(:list)
 end
 op.on('-m', '--merge', "Merge output before reporting") do
@@ -59,7 +59,7 @@ end
 op.on('-H', '--show-hostname', "Show hostname with output (e.g. with --short)") do
   options[:show_hostname] = true
 end
-op.on('--no-hostname', '--nh', "Omit hostname from output (e.g. with --long)") do
+op.on('-h', '--no-hostname', "Omit hostname from output (e.g. with --long)") do
   options[:show_hostname] = false
 end
 op.on('--stream', "Annotate stdout and stderr streams to distinguish them") do
@@ -184,7 +184,7 @@ Json format (-j|--json) reports command results as a json hash with the followin
 keys: host_string (i.e. user@hostname, if given), host, user, exit_code, stdout,
 stderr, and json_class ('Net::SSHR::Result').
 
-List format (--list) reports a list of hostnames that produced stdout command 
+List format (-L|--list) reports a list of hostnames that produced stdout command 
 output (analagous to 'grep -l').
 
 
@@ -195,14 +195,14 @@ output (analagous to 'grep -l').
     -s, --short                      Report short command output (first line only)
     -l, --long                       Report long/full command output
     -j, --json                       Report results as json
-        --list                       Report hosts that produce output (and nothing else)
+    -L, --list                       Report hosts that produce output (and nothing else)
     -m, --merge                      Merge output before reporting
     -o, --out, --stdout              Show only stdout, not stderr
     -e, --err, --stderr              Show only stderr, not stdout
     -b, --oeb, --oe                  Show both stdout and stderr (default with --long)
     -x, --oex                        Show either stdout or stderr, but not both (xor) (default with --short)
     -H, --show-hostname              Show hostname with output (e.g. with --short)
-        --no-hostname, --nh          Omit hostname from output (e.g. with --long)
+    -h, --no-hostname                Omit hostname from output (e.g. with --long)
         --stream                     Annotate stdout and stderr streams to distinguish them
     -q, --quiet                      Omit hosts that don't produce any output
     -v, --verbose                    More verbose output (for debugging)

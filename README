@@ -24,14 +24,14 @@ Options:
     -l, --long                       Report long/full command output
     -s, --short                      Report short command output (first line only)
     -j, --json                       Report results as json
-        --list                       Report hosts that produce output (and nothing else)
+    -L, --list                       Report hosts that produce output (and nothing else)
     -m, --merge                      Merge output before reporting
     -o, --out, --stdout              Show only stdout, not stderr
     -e, --err, --stderr              Show only stderr, not stdout
     -b, --oeb, --oe                  Show both stdout and stderr (default with --long)
     -x, --oex                        Show either stdout or stderr, but not both (xor) (default with --short)
     -H, --show-hostname              Show hostname with output (e.g. with --short)
-        --no-hostname, --nh          Omit hostname from output (e.g. with --long)
+    -h, --no-hostname                Omit hostname from output (e.g. with --long)
         --stream                     Annotate stdout and stderr streams to distinguish them
     -q, --quiet                      Omit hosts that don't produce any output
     -v, --verbose                    More verbose output (for debugging)
