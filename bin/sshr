@@ -13,7 +13,7 @@ include Net::SSHR
 
 $stdout.sync = true
 
-options = { :oe_selector => [], :show_hostname => nil }
+options = { :format => [], :oe_selector => [], :show_hostname => nil }
 
 # Parse options
 op = OptionParser.new
@@ -29,17 +29,17 @@ end
 op.on('-t', '--pty', "Request pseudo-tty allocation on ssh channels") do
   options[:request_pty] = true
 end
-op.on('-l', '--long', "Report long/full command output") do
-  options[:format] = :long
-end
 op.on('-s', '--short', "Report short command output (first line only)") do
-  options[:format] = :short
+  options[:format].push(:short)
+end
+op.on('-l', '--long', "Report long/full command output") do
+  options[:format].push(:long)
 end
 op.on('-j', '--json',  "Report results as json") do
-  options[:format] = :json
+  options[:format].push(:json)
 end
 op.on('--list', "Report hosts that produce output (and nothing else)") do
-  options[:format] = :list
+  options[:format].push(:list)
 end
 op.on('-m', '--merge', "Merge output before reporting") do
   options[:merge] = true
@@ -85,8 +85,15 @@ if args.length < 2:
   $stderr.puts op
   exit
 end
+if options[:format].length > 1
+  $stderr.puts "Error: only one format option may be specified (--short|--long|--json|--list)"
+  $stderr.puts op
+  exit
+else
+   options[:format] =  options[:format][0]
+end
 if options[:oe_selector].length > 1
-  $stderr.puts "Error: multiple stdout/stderr options given"
+  $stderr.puts "Error: only one stdout/stderr option may be specified (--out|--err|--oeb|--oex)"
   $stderr.puts op
   exit
 else
@@ -156,12 +163,37 @@ and collating and presenting the output
 sshr is an asynchronous ssh wrapper for executing a command on multiple hosts
 and collating and presenting any output and/or errors.
 
+Four output formats are currently supported: 
+
+Short format (-s|--short) reports only the first line of stdout and/or stderr,
+discarding any extra output. By default short format omits the hostname (like
+ssh), so you'll often want to use it with -H|--show-hostname. If --show-hostname
+is specified, the output is in the form:
+
+  hostname:             output
+
+Long format (-l|--long) reports all command output for each host, and by default
+both stdout and stderr streams. The output is the form:
+
+  [hostname]
+  stdout_output
+
+  stderr_output
+
+Json format (-j|--json) reports command results as a json hash with the following
+keys: host_string (i.e. user@hostname, if given), host, user, exit_code, stdout,
+stderr, and json_class ('Net::SSHR::Result').
+
+List format (--list) reports a list of hostnames that produced stdout command 
+output (analagous to 'grep -l').
+
+
 == OPTIONS
 
     -u, --user=USER                  Default user for ssh connections
     -t, --pty                        Request pseudo-tty allocation on ssh channels
-    -l, --long                       Report long/full command output
     -s, --short                      Report short command output (first line only)
+    -l, --long                       Report long/full command output
     -j, --json                       Report results as json
         --list                       Report hosts that produce output (and nothing else)
     -m, --merge                      Merge output before reporting
