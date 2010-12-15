@@ -56,10 +56,10 @@ end
 op.on('-x', '--oex', "Show either stdout or stderr, but not both (xor) (default with --short)") do
   options[:oe_selector].push(:oe_xor)
 end
-op.on('-H', '--show-hostname', "Show hostname with output (e.g. with --short)") do
+op.on('-H', '--show-hostname', "Show hostname with output") do
   options[:show_hostname] = true
 end
-op.on('-h', '--no-hostname', "Omit hostname from output (e.g. with --long)") do
+op.on('-h', '--no-hostname', "Omit hostname from output") do
   options[:show_hostname] = false
 end
 op.on('--stream', "Annotate stdout and stderr streams to distinguish them") do
