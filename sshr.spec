@@ -5,7 +5,7 @@
 
 Summary: Flexible ssh wrapper to execute commands on remote hosts
 Name: sshr
-Version: 0.10
+Version: 0.11
 Release: 1%{?org_tag}%{?dist}
 Group: System/Application
 License: GPLv2+ or Ruby
@@ -67,7 +67,10 @@ rm -rf %{buildroot}
 %{gemdir}/specifications/%{gemname}-%{version}.gemspec
 
 %changelog
-* Thu Dec 14 2010 Gavin Carr <gavin@openfusion.com.au> - 0.10-1
+* Wed Dec 15 2010 Gavin Carr <gavin@openfusion.com.au> - 0.11-1
+- Change default sshr --short output back to showing hostnames.
+
+* Tue Dec 14 2010 Gavin Carr <gavin@openfusion.com.au> - 0.10-1
 - Add -q|--quiet option to sshr to omit hosts without output.
 - Add -L|--list format option to sshr to list hostnames with output (cf. grep -l).
 - Move sshr formatting tests to test_net_sshr_formatter.
