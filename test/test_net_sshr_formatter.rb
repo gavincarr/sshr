@@ -106,12 +106,12 @@ class TestNetSSHRFormatter < Test::Unit::TestCase
   end
 
   def test_short
-    outerr      = "Output the first\nError the first\n"
-    out         = "Output the first\n"
-    err         = "Error the first\n"
-    outerr_h    = "localhost:           Output the first\nlocalhost:           Error the first\n"
-    out_h       = "localhost:           #{out}"
-    err_h       = "localhost:           #{err}"
+    outerr      = "localhost:           Output the first\nlocalhost:           Error the first\n"
+    out         = "localhost:           Output the first\n"
+    err         = "localhost:           Error the first\n"
+    outerr_nh   = "Output the first\nError the first\n"
+    out_nh      = "Output the first\n"
+    err_nh      = "Error the first\n"
 
     # Short defaults
     fmt = Net::SSHR::Formatter.new({
@@ -156,52 +156,52 @@ class TestNetSSHRFormatter < Test::Unit::TestCase
 
 
 
-    # Short defaults w/hostname
+    # Short defaults, nohostname
     fmt = Net::SSHR::Formatter.new({
       :format           => :short,
-      :show_hostname    => :true,
+      :show_hostname    => false,
     })
-    assert_equal(out_h, fmt.render(@result))
+    assert_equal(out_nh, fmt.render(@result))
 
-    # Short both w/hostname
+    # Short both, no hostname
     fmt = Net::SSHR::Formatter.new({
       :format           => :short,
       :out_err_selector => :oe_both,
-      :show_hostname    => :true,
+      :show_hostname    => false,
     })
-    assert_equal(outerr_h, fmt.render(@result))
+    assert_equal(outerr_nh, fmt.render(@result))
 
-    # Short stdout only w/hostname
+    # Short stdout only, no hostname
     fmt = Net::SSHR::Formatter.new({
       :format           => :short,
       :out_err_selector => :oe_out,
-      :show_hostname    => :true,
+      :show_hostname    => false,
     })
-    assert_equal(out_h, fmt.render(@result))
+    assert_equal(out_nh, fmt.render(@result))
 
-    # Short stderr only w/hostname
+    # Short stderr only, no hostname
     fmt = Net::SSHR::Formatter.new({
       :format           => :short,
       :out_err_selector => :oe_err,
-      :show_hostname    => :true,
+      :show_hostname    => false,
     })
-    assert_equal(err_h, fmt.render(@result))
+    assert_equal(err_nh, fmt.render(@result))
 
-    # Short xor w/hostname
+    # Short xor, no hostname
     fmt = Net::SSHR::Formatter.new({
       :format           => :short,
       :out_err_selector => :oe_xor,
-      :show_hostname    => :true,
+      :show_hostname    => false,
     })
-    assert_equal(out_h, fmt.render(@result))
+    assert_equal(out_nh, fmt.render(@result))
     #
-    # Short xor, no stdout, w/hostname
+    # Short xor, no stdout, no hostname
     fmt = Net::SSHR::Formatter.new({
       :format           => :short,
       :out_err_selector => :oe_xor,
-      :show_hostname    => :true,
+      :show_hostname    => false,
     })
-    assert_equal(err_h, fmt.render(@stderr_result))
+    assert_equal(err_nh, fmt.render(@stderr_result))
   end
 
   def test_json

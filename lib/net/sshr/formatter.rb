@@ -21,7 +21,7 @@ module Net
       attr_accessor :out_err_selector
 
       # Whether to show the hostname in the output (boolean)
-      # Default is +false+ for :short format, and +true+ otherwise
+      # Default is +true+.
       attr_accessor :show_hostname
 
       # Whether to show hosts that produce no output (boolean)
@@ -41,7 +41,7 @@ module Net
       def initialize(options = {})
         @format = nil
         @out_err_selector = nil
-        @show_hostname = nil
+        @show_hostname = true
         @quiet = false
         @annotate_flag = false
         @hostname_width = 20
@@ -62,9 +62,7 @@ module Net
         @format ||= result.stdout =~ /\n/ ? :long : :short
 
         # Default out_err_selector if not set: stdout xor stderr in 'short' mode, otherwise both
-        # Default show_header if not set: false in 'short' mode, otherwise true
         @out_err_selector ||= (@format == :short ? :oe_xor : :oe_both)
-        @show_hostname = (@format == :short ? false : true) if @show_hostname == nil
 
         method(@format).call(result) || ''
       end
