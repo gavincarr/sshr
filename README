@@ -30,8 +30,8 @@ Options:
     -e, --err, --stderr              Show only stderr, not stdout
     -b, --oeb, --oe                  Show both stdout and stderr (default with --long)
     -x, --oex                        Show either stdout or stderr, but not both (xor) (default with --short)
-    -H, --show-hostname              Show hostname with output (e.g. with --short)
-    -h, --no-hostname                Omit hostname from output (e.g. with --long)
+    -H, --show-hostname              Show hostname with output
+    -h, --no-hostname                Omit hostname from output
         --stream                     Annotate stdout and stderr streams to distinguish them
     -q, --quiet                      Omit hosts that don't produce any output
     -v, --verbose                    More verbose output (for debugging)

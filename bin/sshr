@@ -13,7 +13,7 @@ include Net::SSHR
 
 $stdout.sync = true
 
-options = { :format => [], :oe_selector => [], :show_hostname => nil }
+options = { :format => [], :oe_selector => [] }
 
 # Parse options
 op = OptionParser.new
@@ -165,10 +165,8 @@ and collating and presenting any output and/or errors.
 
 Four output formats are currently supported: 
 
-Short format (-s|--short) reports only the first line of stdout and/or stderr,
-discarding any extra output. By default short format omits the hostname (like
-ssh), so you'll often want to use it with -H|--show-hostname. If --show-hostname
-is specified, the output is in the form:
+Short format (-s|--short) reports only the hostname and the first line of stdout
+(or stderr if no stdout), discarding any extra output. The output is in the form:
 
   hostname:             output
 
@@ -201,8 +199,8 @@ output (analagous to 'grep -l').
     -e, --err, --stderr              Show only stderr, not stdout
     -b, --oeb, --oe                  Show both stdout and stderr (default with --long)
     -x, --oex                        Show either stdout or stderr, but not both (xor) (default with --short)
-    -H, --show-hostname              Show hostname with output (e.g. with --short)
-    -h, --no-hostname                Omit hostname from output (e.g. with --long)
+    -H, --show-hostname              Show hostname with output
+    -h, --no-hostname                Omit hostname from output
         --stream                     Annotate stdout and stderr streams to distinguish them
     -q, --quiet                      Omit hosts that don't produce any output
     -v, --verbose                    More verbose output (for debugging)
