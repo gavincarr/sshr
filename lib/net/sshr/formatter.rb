@@ -47,7 +47,7 @@ module Net
         @hostname_width = 20
         @host_count = 0
 
-        options.each{|opt, val| send("#{opt}=", val) }
+        options.each{|opt, val| send("#{opt}=", val) if val != nil }
       end
 
       # Returns a formatted output string for the given result
