@@ -12,12 +12,12 @@ module Net
   # = SYNOPSIS
   #
   #   require 'net/sshr'
-  #   include SSHR
+  #   include Net::SSHR
   #
   #   # Run a command on multiple hosts
   #   sshr_exec(%w{ host1 host2 }, 'uptime') do |result|
   #     puts "#{result.host}: #{result.exit_code}"
-  #     puts #{result.stdout}
+  #     puts result.stdout
   #   end
   #
   #   # Run arbitrary sets of host-command pairs
@@ -28,7 +28,7 @@ module Net
   #                   'host3', 'uname -r'
   #                 ) do |result|
   #     puts "#{result.host}: #{result.exit_code}"
-  #     puts #{result.stdout}
+  #     puts result.stdout
   #   end
   #
   #   # Trivial single-host usage
