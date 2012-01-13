@@ -5,7 +5,7 @@
 
 Summary: Flexible ssh wrapper to execute commands on remote hosts
 Name: sshr
-Version: 0.12
+Version: 0.12.1
 Release: 1%{?org_tag}%{?dist}
 Group: System/Application
 License: GPLv2+ or Ruby
