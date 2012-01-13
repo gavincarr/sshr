@@ -5,7 +5,7 @@
 
 Summary: Flexible ssh wrapper to execute commands on remote hosts
 Name: sshr
-Version: 0.11.2
+Version: 0.12
 Release: 1%{?org_tag}%{?dist}
 Group: System/Application
 License: GPLv2+ or Ruby
@@ -67,6 +67,9 @@ rm -rf %{buildroot}
 %{gemdir}/specifications/%{gemname}-%{version}.gemspec
 
 %changelog
+* Fri Jan 13 2012 Gavin Carr <gavin@openfusion.com.au> - 0.12-1
+- Tweak :quiet handling to also consider stderr.
+
 * Thu Jan 12 2012 Gavin Carr <gavin@openfusion.com.au> - 0.11.2-1
 - Tweaks to documentation.
 
