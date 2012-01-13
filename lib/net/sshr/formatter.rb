@@ -56,7 +56,7 @@ module Net
         result.stdout.chomp!
         result.stderr.chomp!
 
-        return '' if @quiet and result.stdout == ''
+        return '' if @quiet and result.stdout == '' and result.stderr = ''
 
         # Default formatter: use short for single lines, otherwise long
         @format ||= result.stdout =~ /\n/ ? :long : :short
