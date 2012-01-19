@@ -126,7 +126,7 @@ module Net
           # Setup result objects to capture results, one per cmd per server
           result_data[server.object_id] ||= []
           result_data[server.object_id].push Net::SSHR::Result.new(host, cmd)
-          $stderr.puts "+ [#{server.object_id}] #{session_host} => #{cmd}" if options[:verbose]
+          $stderr.puts "+ [#{server.object_id}] #{host} => #{cmd}" if options[:verbose]
         end
 
         session.open_channel do |channel|
