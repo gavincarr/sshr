@@ -113,7 +113,7 @@ module Net
           out << "** STDERR **\n" if @annotate_flag
         end
         out << result.stderr + "\n" if display_stderr
-        out << "\n" unless @host_count == 1
+        out << "\n" if @host_count >= 1 and @show_hostname
         return out
       end
 
