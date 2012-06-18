@@ -120,21 +120,19 @@ module Net
       # Short output renderer
       def short(result)
         out = ''
-        hostname = ''
-        fmt = "%s%s\n"
+        hostname_prefix = ''
         if @show_hostname
-          fmt = "%-#{@hostname_width}s " + fmt
-          hostname = result.host + ':'
-        else
-          fmt = '%s' + fmt
+          hostname_prefix = sprintf("%-#{@hostname_width}s ", result.host + ':')
         end
         if display_stdout(result.stdout):
-          stdout = result.stdout.sub(/\n.*/m, '')
-          out << sprintf(fmt, hostname, @annotate_flag ? '[O] ' : '', stdout)
+          out << hostname_prefix
+          out << (@annotate_flag ? '[O] ' : '')
+          out << result.stdout.sub(/\n.*/m, "\n")
         end
         if display_stderr(result.stderr, result.stdout):
-          stderr = result.stderr.sub(/\n.*/m, '')
-          out << sprintf(fmt, hostname, @annotate_flag ? '[E] ' : '', stderr)
+          out << hostname_prefix
+          out << (@annotate_flag ? '[E] ' : '')
+          out << result.stderr.sub(/\n.*/m, "\n")
         end
         return out
       end
