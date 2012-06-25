@@ -56,11 +56,15 @@ end
 op.on('-x', '--oex', "Show either stdout or stderr, but not both (xor) (default with --short)") do
   options[:oe_selector].push(:oe_xor)
 end
-op.on('-H', '--show-hostname', "Show hostname with output") do
+op.on('-H', '--show-hostname', "Show hostname with output (default)") do
   options[:show_hostname] = true
 end
 op.on('-h', '--no-hostname', "Omit hostname from output") do
   options[:show_hostname] = false
+end
+op.on('--prefix','--prefix-hostname', "Prefix hostname to output lines (with --long)") do
+  options[:show_hostname] = true
+  options[:prefix_hostname] = true
 end
 op.on('--stream', "Annotate stdout and stderr streams to distinguish them") do
   options[:annotate_flag] = true
@@ -118,6 +122,7 @@ trap("INT") { puts; exit }
 fmt    = Net::SSHR::Formatter.new({ :format             => options[:format],
                                     :out_err_selector   => options[:oe_selector],
                                     :show_hostname      => options[:show_hostname],
+                                    :prefix_hostname    => options[:prefix_hostname],
                                     :quiet              => options[:quiet],
                                     :annotate_flag      => options[:annotate_flag],
                                     :host_count         => hosts.length,
