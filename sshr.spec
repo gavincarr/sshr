@@ -5,7 +5,7 @@
 
 Summary: Flexible ssh wrapper to execute commands on remote hosts
 Name: sshr
-Version: 0.12.2
+Version: 0.13
 Release: 1%{?org_tag}%{?dist}
 Group: System/Application
 License: GPLv2+ or Ruby
@@ -67,6 +67,9 @@ rm -rf %{buildroot}
 %{gemdir}/specifications/%{gemname}-%{version}.gemspec
 
 %changelog
+* Mon Jun 25 2012 Gavin Carr <gavin@openfusion.com.au> 0.13-1
+- Add --prefix-hostname option (for use with --long) to sshr and formatter.
+
 * Thu Jan 19 2012 Gavin Carr <gavin@openfusion.com.au> - 0.12.2-1
 - Fix typo in sshr_exec_list verbose message.
 
