@@ -78,8 +78,11 @@ module Net
           stderr = result.stderr.sub(/\n.*/m, "\n")
         end
 
+        # Use short formatter in @prefix_hostname mode
+        formatter = (@format == :long and @prefix_hostname) ? 'short' : @format
+
         # Call specified formatter
-        method(@format).call(result.host, stdout, stderr) || ''
+        method(formatter).call(result.host, stdout, stderr) || ''
       end
 
       # Returns a formatted output string for the given set of results
@@ -140,17 +143,21 @@ module Net
         out = ''
         hostname_prefix = ''
         if @show_hostname
-          hostname_prefix = sprintf("%-#{@hostname_width}s ", hostname + ':')
+          hostname_prefix = sprintf("%-#{@hostname_width}s ", hostname)
         end
         if display_stdout
-          out << hostname_prefix
-          out << (@annotate_flag ? '[O] ' : '')
-          out << stdout
+          stdout.split(/\n/).each do |line|
+            out << hostname_prefix
+            out << (@annotate_flag ? '[O] ' : '')
+            out << line + "\n"
+          end
         end
         if display_stderr
-          out << hostname_prefix
-          out << (@annotate_flag ? '[E] ' : '')
-          out << stderr
+          stderr.split(/\n/).each do |line|
+            out << hostname_prefix
+            out << (@annotate_flag ? '[E] ' : '')
+            out << line + "\n"
+          end
         end
         return out
       end
