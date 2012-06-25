@@ -24,6 +24,10 @@ module Net
       # Default is +true+.
       attr_accessor :show_hostname
 
+      # Whether to prefix the hostname to all output lines in :long mode (boolean)
+      # Default is +false+.
+      attr_accessor :prefix_hostname
+
       # Whether to show hosts that produce no output (boolean)
       # Default is +false+ i.e. show hosts that produce no output
       attr_accessor :quiet
@@ -42,6 +46,7 @@ module Net
         @format = nil
         @out_err_selector = nil
         @show_hostname = true
+        @prefix_hostname = false
         @quiet = false
         @annotate_flag = false
         @hostname_width = 20
@@ -64,7 +69,17 @@ module Net
         # Default out_err_selector if not set: stdout xor stderr in 'short' mode, otherwise both
         @out_err_selector ||= (@format == :short ? :oe_xor : :oe_both)
 
-        method(@format).call(result) || ''
+        # Process result output
+        stdout = result.stdout
+        stderr = result.stderr
+        if @format == :short
+          # Truncate short output to initial line
+          stdout = result.stdout.sub(/\n.*/m, "\n")
+          stderr = result.stderr.sub(/\n.*/m, "\n")
+        end
+
+        # Call specified formatter
+        method(@format).call(result.host, stdout, stderr) || ''
       end
 
       # Returns a formatted output string for the given set of results
@@ -101,38 +116,41 @@ module Net
       end
 
       # Long output renderer
-      def long(result)
-        display_stdout = display_stdout(result.stdout)
-        display_stderr = display_stderr(result.stderr, result.stdout)
+      def long(hostname, stdout, stderr)
+        display_stdout = display_stdout(stdout)
+        display_stderr = display_stderr(stderr, stdout)
 
         out = ''
-        out << "[#{result.host}]\n" if @show_hostname
-        out << result.stdout + "\n" if display_stdout
+        out << "[#{hostname}]\n" if @show_hostname
+        out << stdout + "\n" if display_stdout
         if display_stdout and display_stderr:
           out << "\n" 
           out << "** STDERR **\n" if @annotate_flag
         end
-        out << result.stderr + "\n" if display_stderr
+        out << stderr + "\n" if display_stderr
         out << "\n" if @host_count >= 1 and @show_hostname
         return out
       end
 
       # Short output renderer
-      def short(result)
+      def short(hostname, stdout, stderr)
+        display_stdout = display_stdout(stdout)
+        display_stderr = display_stderr(stderr, stdout)
+
         out = ''
         hostname_prefix = ''
         if @show_hostname
-          hostname_prefix = sprintf("%-#{@hostname_width}s ", result.host + ':')
+          hostname_prefix = sprintf("%-#{@hostname_width}s ", hostname + ':')
         end
-        if display_stdout(result.stdout):
+        if display_stdout
           out << hostname_prefix
           out << (@annotate_flag ? '[O] ' : '')
-          out << result.stdout.sub(/\n.*/m, "\n")
+          out << stdout
         end
-        if display_stderr(result.stderr, result.stdout):
+        if display_stderr
           out << hostname_prefix
           out << (@annotate_flag ? '[E] ' : '')
-          out << result.stderr.sub(/\n.*/m, "\n")
+          out << stderr
         end
         return out
       end
