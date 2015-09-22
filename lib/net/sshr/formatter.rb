@@ -126,7 +126,7 @@ module Net
         out = ''
         out << "[#{hostname}]\n" if @show_hostname
         out << stdout + "\n" if display_stdout
-        if display_stdout and display_stderr:
+        if display_stdout and display_stderr
           out << "\n" 
           out << "** STDERR **\n" if @annotate_flag
         end

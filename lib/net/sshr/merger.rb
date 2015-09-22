@@ -14,7 +14,7 @@ module Net
 
         added = false
         each do |merged|
-          if merged.stdout == stdout and merged.stderr == stderr:
+          if merged.stdout == stdout and merged.stderr == stderr
             merged.host += ' ' + result.host
             added = true
             break

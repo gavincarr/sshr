@@ -148,7 +148,7 @@ module Net
 
     def gen_channel_exec_block(result, options, &block)
       return lambda { |channel, success|
-        if not success:
+        if not success
           result.stderr << "exec on #{result.host} #{result.cmd} failed!"
           result.exit_code ||= 255
           yield result if block
@@ -169,7 +169,7 @@ module Net
 
         # Callback on channel close, yielding results
         channel.on_close do |channel|
-          if options[:verbose]:
+          if options[:verbose]
             $stderr.puts "+ stdout: #{result.stdout}" if options[:verbose]
           end
           yield result if block
@@ -181,37 +181,43 @@ module Net
 
   # Monkey-patch Net::SSH::Multi::ServerList to allow duplicate hosts
   # (tried patching upstream, but have never got a response)
-  module SSH; module Multi; class ServerList
-    def initialize(list=[])
-      options = list.last.is_a?(Hash) ? list.pop : {}
-      @list = list
-    end
-    def add(server)
-      @list.push(server)
-      server
-    end
-    def flatten
-      result = @list.inject([]) do |aggregator, server|
-        case server
-        when Server then aggregator.push(server)
-        when DynamicServer then aggregator.concat(server)
-        else raise ArgumentError, "server list contains non-server: #{server.class}"
+  module SSH
+    module Multi
+      class ServerList
+        def initialize(list=[])
+          options = list.last.is_a?(Hash) ? list.pop : {}
+          @list = list
+        end
+        def add(server)
+          @list.push(server)
+          server
+        end
+        def flatten
+          result = @list.inject([]) do |aggregator, server|
+            case server
+            when Server then aggregator.push(server)
+            when DynamicServer then aggregator.concat(server)
+            else raise ArgumentError, "server list contains non-server: #{server.class}"
+            end
+          end
+          result
         end
       end
-      result
     end
-  end; end; end
+  end
 
   # Monkey-patch Net::SSH::Config#for to default options user if unset
-  module SSH; class Config
-    class <<self
-      alias_method :old_for, :for
-      def for(host, files=default_files)
-        options = old_for(host, files)
-        options[:user] ||= ENV['USER'] || ENV['USERNAME'] || 'unknown'
-        options
+  module SSH
+    class Config
+      class <<self
+        alias_method :old_for, :for
+        def for(host, files=default_files)
+          options = old_for(host, files)
+          options[:user] ||= ENV['USER'] || ENV['USERNAME'] || 'unknown'
+          options
+        end
       end
     end
-  end; end
+  end
 end
 

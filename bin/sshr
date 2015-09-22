@@ -84,7 +84,7 @@ rescue => e
   $stderr.puts op
   exit
 end
-if args.length < 2:
+if args.length < 2
   $stderr.puts "Error: must supply at least two arguments"
   $stderr.puts op
   exit
@@ -137,7 +137,7 @@ sshr_exec_options = {
   :verbose => options[:verbose],
 }
 sshr_exec(hosts, cmd, sshr_exec_options) do |res|
-  if options[:merge]:
+  if options[:merge]
     merger.merge(res)
   else
     print fmt.render(res)
@@ -145,7 +145,7 @@ sshr_exec(hosts, cmd, sshr_exec_options) do |res|
 end
 
 # In merge mode, report merged output at end
-if options[:merge]:
+if options[:merge]
   $stderr.puts "+ execs completed, merging results" if options[:verbose]
   print fmt.render_all(merger) 
 end
