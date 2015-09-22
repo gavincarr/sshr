@@ -76,7 +76,7 @@ Net::SSHR, Net::SSHR::Result, Net::SSH::Multi
 Author
 ------
 
-Copyright 2010 Gavin Carr <gavin@openfusion.net>
+Copyright 2010-2015 Gavin Carr <gavin@openfusion.net>
 
 
 Licence
