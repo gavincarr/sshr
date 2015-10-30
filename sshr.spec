@@ -3,7 +3,7 @@
 Summary: Flexible ssh wrapper to execute commands on remote hosts
 Name: sshr
 Version: 0.14
-Release: 1%{?org_tag}%{?dist}
+Release: 2%{?org_tag}%{?dist}
 Group: System/Application
 License: GPLv2+ or Ruby
 URL: http://www.openfusion.net/tags/sshr
@@ -36,24 +36,28 @@ An ssh wrapper library optimised for executing one or more commands on
 multiple hosts.
 
 %prep
+gem unpack %{SOURCE0}
+%setup -q -D -T -n  %{gem_name}-%{version}
+gem spec %{SOURCE0} -l --ruby > %{gem_name}.gemspec
 
 %build
+# Create the gem as gem install only works on a gem file
+gem build %{gem_name}.gemspec
+
+# %%gem_install compiles any C extensions and installs the gem into ./%%gem_dir
+# by default, so that we can move it into the buildroot in %%install
+%gem_install
 
 %install
-rm -rf %{buildroot}
 mkdir -p %{buildroot}%{gem_dir}
-gem install --local --install-dir %{buildroot}%{gem_dir} \
-            --force --rdoc %{SOURCE0}
+mv ./%{gem_dir}/* %{buildroot}%{gem_dir}
+#gem install --local --install-dir %{buildroot}%{gem_dir} --force --rdoc %{SOURCE0}
 mkdir -p %{buildroot}/%{_bindir}
-mv %{buildroot}%{gem_dir}/bin/* %{buildroot}/%{_bindir}
-rmdir %{buildroot}%{gem_dir}/bin
+mv bin/* %{buildroot}/%{_bindir}
 
 # Create a man page
 mkdir -p %{buildroot}%{_mandir}/man1
 rd2 -r rd/rd2man-lib.rb %{buildroot}%{gem_instdir}/bin/sshr > %{buildroot}%{_mandir}/man1/sshr.1
-
-%clean
-rm -rf %{buildroot}
 
 %files
 %defattr(-, root, root, -)
@@ -68,6 +72,9 @@ rm -rf %{buildroot}
 %{gem_dir}/specifications/%{gem_name}-%{version}.gemspec
 
 %changelog
+* Sat Oct 31 2015 Gavin Carr <gavin@openfusion.com.au> 0.14-2
+- Update spec file to use %gem_install in %build section.
+
 * Tue Sep 22 2015 Gavin Carr <gavin@openfusion.com.au> 0.14-1
 - Minor syntax updates for compatibility with ruby >= 1.9.
 
